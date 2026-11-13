@@ -28,11 +28,13 @@ to run when the document it depends on is not approved.
 
 ## Principles to preserve when writing skills
 
-- **Token economy**: one main agent, no subagent fan-out. Keep progress in
-  files so a slice can start from a fresh context. Anything a script can decide
-  (format, lint, coverage, doc sync) belongs in `make check`, not in a prompt.
+- **Token economy**: one main agent, no subagent fan-out. The only exception is
+  one fresh-context review agent per slice. Keep progress in files so a slice
+  can start from a fresh context. Anything a script can decide (format, lint,
+  coverage, doc sync) belongs in `make check`, and rules that must not be
+  broken (gates, `main` protection) belong in hooks, not in a prompt.
 - **Run to completion**: stop for the human only at the gates, on ambiguous
-  requirements, or after repeated failed fixes.
+  requirements, or after three failed fixes of the same problem.
 - **TDD**: failing tests first, then the code that passes them.
 - **Vertical slices**: every slice is testable end to end. The first slice is a
   walking skeleton that includes CI, e2e, and deployment.
