@@ -37,7 +37,7 @@ def test_marketplace_offers_this_repository_as_the_plugin():
     assert entry["source"] == "./"
 
 
-@pytest.mark.parametrize("stage", ["spec", "design", "slice"])
+@pytest.mark.parametrize("stage", ["spec", "design", "slice", "build"])
 def test_the_stage_has_a_skill(stage):
     assert ROOT / "skills" / stage / "SKILL.md" in SKILLS
 

@@ -64,6 +64,7 @@ and scripts depend on nothing else.
 | `docs/backlog.md` | `slice`, updated by `build` | Yes |
 | `docs/delivery/vX.Y.Z.md` | `release` | Yes; approval is the acceptance |
 | `scripts/check-docs.py` | `build`, in the walking skeleton | No |
+| `CLAUDE.md` | `build`, in the walking skeleton | No. Commands and rules for a fresh context |
 
 A gated document has `Status: Draft` or `Status: Approved` as the first line
 after its title. The human approves by typing `approve` in Claude Code (see
@@ -160,6 +161,10 @@ slice is already `In progress`, the run resumes it from its `Notes`.
 
 A failed fix is recorded in the slice's `Notes`. After three failed fixes of
 the same problem, the skill stops and asks the human.
+
+`build` needs a GitHub remote and `gh`, because a `Done` slice must name its
+pull request. In every slice it compares the project's `check-docs.py` with
+the plugin's by `--version` and copies a newer one.
 
 The skill itself launches no agent other than the reviewer in step 4. It
 neither asks for nor forbids the subagents that Claude Code starts on its own

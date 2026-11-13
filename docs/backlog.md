@@ -140,7 +140,7 @@ Notes:
 
 ## S05: Build one slice
 
-Status: Todo
+Status: In progress
 
 Acceptance criteria:
 - `/nightshift:build` refuses to run unless the architecture and the backlog
@@ -159,6 +159,19 @@ Acceptance criteria:
 - When no slice is left, it asks for `/nightshift:release` *(by hand)*.
 - The structure tests check the skill's line budget and that every template
   it names exists.
+
+Notes:
+- The skill is at the 80-line budget. S07 adds the review step, so it must
+  shorten something else or raise the budget.
+- New templates: `pull-request.md` (S07 adds the review result to it) and
+  `CLAUDE.md`, which the walking skeleton fills in for the project.
+- `build` requires a GitHub remote and `gh`; unlike `spec` and `design` it
+  has no fallback, because a `Done` slice needs a pull request number.
+- The pull request is opened first, then the slice is set to `Done` with its
+  number in a second commit, so `make check` passes on the merged commit.
+- A failing CI check counts as a failed fix toward the limit of three.
+- The six *(by hand)* criteria are not yet verified; they are when `cellar`
+  builds its first slices.
 
 ## S06: Check before stopping
 
