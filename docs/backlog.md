@@ -238,7 +238,8 @@ Notes:
 
 ## S08: Release and acceptance
 
-Status: In progress
+Status: Done
+PR: #11
 
 Acceptance criteria:
 - `/nightshift:release` refuses to run while any slice is not `Done`
