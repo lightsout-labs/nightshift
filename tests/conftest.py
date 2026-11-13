@@ -22,6 +22,16 @@ def run_script(*args: str, cwd: Path) -> subprocess.CompletedProcess[str]:
     )
 
 
+def run_check_docs(*args: str, cwd: Path) -> subprocess.CompletedProcess[str]:
+    """Run the document check from `cwd`, as a project's `make check` does."""
+    return subprocess.run(
+        [sys.executable, str(ROOT / "templates" / "check-docs.py"), *args],
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+    )
+
+
 def run_hook(name: str, payload: dict) -> subprocess.CompletedProcess[str]:
     """Run the hook file `hooks/<name>.py` with `payload` as its JSON input."""
     return subprocess.run(

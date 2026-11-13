@@ -112,7 +112,7 @@ Notes:
 
 ## S04: Document sync check
 
-Status: Todo
+Status: In progress
 
 Acceptance criteria:
 - `check-docs.py` fails, naming the file and the reason, when a gated
@@ -122,6 +122,20 @@ Acceptance criteria:
 - It passes on a project whose documents are consistent.
 - It is one file with no dependencies and carries a version line.
 - This repository's own `make check` runs it on `docs/`.
+
+Notes:
+- The file is `templates/check-docs.py`. It takes no arguments, reads `docs/`
+  under the current directory, and reports every problem in one run.
+- "Malformed" is: a heading that is not `## Snn: title`, a slice number used
+  twice, a missing or unknown status line, or no acceptance criteria.
+- Links are checked for the file only, not the anchor. Links in code, web
+  addresses, and paths that start with `/` are skipped.
+- It repeats the status and backlog rules of `nightshift.py`, because the
+  copy must run alone. The e2e test runs both on the same project.
+- `VERSION` is a whole number and `--version` prints it, so `build` (S05) can
+  compare a project's copy with the plugin's.
+- A `Done` slice needs its pull request number, so `build` (S05) must open
+  the pull request before it sets the slice to `Done`, not after.
 
 ## S05: Build one slice
 
