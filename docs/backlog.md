@@ -1,6 +1,6 @@
 # Backlog
 
-Status: Draft
+Status: Approved
 
 Slices for the `nightshift` plugin, built in this order. The format is defined
 in [architecture.md](architecture.md#backlog-format).

@@ -1,6 +1,6 @@
 # Architecture
 
-Status: Draft
+Status: Approved
 
 This document describes how the `nightshift` plugin is built. What it must do
 is in [requirements.md](requirements.md). Rationale for the decisions that are
