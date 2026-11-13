@@ -204,7 +204,8 @@ Notes:
 
 ## S07: Independent slice review
 
-Status: In progress
+Status: Done
+PR: #9
 
 Acceptance criteria:
 - The `slice-reviewer` agent is read-only, and its definition passes the
