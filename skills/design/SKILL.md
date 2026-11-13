@@ -23,7 +23,11 @@ existing `docs/architecture.md` (then you are revising it). Ask the human,
 with AskUserQuestion, only where a requirement is ambiguous in a way that
 changes the design. Decide everything else yourself:
 
-- The simplest stack that meets the requirements and constraints.
+- The simplest architecture that meets the requirements and constraints: the
+  fewest components, layers, and dependencies, and nothing for a need they
+  do not state. Justify each part by a requirement, or remove it.
+- Core logic free of I/O, UI, and framework code, so tests reach it
+  directly. Each piece of knowledge has one owning module.
 - Deep modules: few operations in each interface, substantial behavior
   behind it. If a module only passes calls through, merge it into another.
 - How each level is tested, the coverage floor, and how the project deploys.

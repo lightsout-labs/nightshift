@@ -37,6 +37,8 @@ leave `Done` slices as they are and set the document to `Status: Draft`.
 - **Acceptance criteria** are observable statements that each become a test.
   Say what happens, not how it is built. End each with the requirement it
   serves, such as `(R3)`.
+- A quality requirement, such as UI polish, becomes a criterion in every
+  slice it applies to, not a slice of its own at the end.
 - Every requirement is served by at least one slice. Nothing in the backlog
   goes beyond the requirements.
 - Keep the format exact, because scripts parse it: `## Snn: <title>`, a blank

@@ -36,7 +36,8 @@ Before any code, write failing tests from the acceptance criteria:
 
 ## 3. Code
 
-Write code until `make check` and `make e2e` pass.
+Write code until `make check` and `make e2e` pass. Keep it simple in scope,
+not in quality: nothing for a later slice or a need no criterion states.
 
 - Deep modules: few operations in each interface, substantial behavior
   behind it. Follow the architecture document; if it is wrong, change it in
@@ -50,8 +51,7 @@ Write code until `make check` and `make e2e` pass.
   tell the human the problem and the three attempts, and stop.
 - If `python3 scripts/check-docs.py --version` prints a lower number than
   `PLUGIN/templates/check-docs.py --version`, copy it again.
-- A walking skeleton slice also delivers what
-  `PLUGIN/skills/build/walking-skeleton.md` lists. Read it for that slice only.
+- Walking skeleton slice only: read `PLUGIN/skills/build/walking-skeleton.md`.
 
 ## 4. Review
 

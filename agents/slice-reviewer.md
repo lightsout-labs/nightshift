@@ -20,9 +20,12 @@ passed. Do not comment on them, on style, or on naming. Answer four questions:
 1. **Acceptance criteria**: is each criterion met by the code and proved by a
    test? A criterion with no test, or a test that does not prove it, is a
    finding.
-2. **Module depth**: does each interface hide substantial behavior behind few
+2. **Design**: does each interface hide substantial behavior behind few
    operations? Does anything leak internals, or contradict the architecture
-   document without changing it in the same diff?
+   document without changing it in the same diff? Is anything built that no
+   criterion needs, such as a feature, option, or layer for later? A deep
+   module with one caller is not a finding, and neither is careful handling
+   of errors and edge cases.
 3. **Tests**: do they go through public interfaces only? Would each fail if
    the behavior broke? Is any test redundant, or written to raise coverage?
    Was a test weakened, a lint rule switched off, or the coverage floor

@@ -15,6 +15,7 @@ hooks parse that file. There is no other state.
 
 - One file to read, review, and keep in sync; nothing can disagree with it.
 - The format is a contract. `check-docs.py` rejects a malformed backlog.
-- The file grows with the project. At about ten lines per slice this is
-  acceptable; the `next` subcommand prints one section so that skills do not
-  read the whole file.
+- The file grows with the project: a built slice takes about thirty lines
+  with its notes. The `next` subcommand prints one section, so skills do not
+  read the whole file, and `release` moves the finished slices to
+  `docs/backlog/vX.Y.Z.md`, so the file is never larger than one release.

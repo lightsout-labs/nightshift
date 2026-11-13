@@ -19,7 +19,8 @@ to reverse are in the ADRs under `docs/adr/`.
 ## Modules
 
 Each module has a small interface and hides substantial behavior. Tests go
-through the interface only.
+through the interface only. Every module, layer, and dependency is here
+because a requirement needs it.
 
 | Module | Interface | Hides |
 |---|---|---|

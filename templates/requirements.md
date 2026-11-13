@@ -9,6 +9,7 @@ Status: Draft
 ## Requirements
 
 Numbered, each one testable. Later documents refer to them by number.
+Quality bars, such as how polished the UI must be, are requirements too.
 
 1. <Requirement.>
 

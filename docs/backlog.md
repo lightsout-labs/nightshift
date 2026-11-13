@@ -247,6 +247,11 @@ Acceptance criteria:
   project's architecture document describes, writes
   `docs/delivery/vX.Y.Z.md` with `Status: Draft`, and stops at the acceptance
   gate *(by hand)*.
+- It moves the slices, all `Done`, from `docs/backlog.md` to
+  `docs/backlog/vX.Y.Z.md`, so the backlog holds only the slices of the
+  release in progress. `slice` numbers the next release's slices after the
+  archived ones *(by hand)*.
+- `nightshift.py next` and `check-docs.py` accept a backlog with no slices.
 - The delivery report lists what was delivered against the requirements, how
   to try it, and known limits *(by hand)*.
 - After `approve`, the skill merges the report and closes the release
