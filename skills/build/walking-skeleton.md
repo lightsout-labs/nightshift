@@ -8,6 +8,8 @@
 - `scripts/check-docs.py`, copied unchanged from
   `PLUGIN/templates/check-docs.py`.
 - `CLAUDE.md`, from `PLUGIN/templates/CLAUDE.md`, filled in.
+- `README.md`, which `spec` started: add how to install, run, and test the
+  project, and where it is deployed.
 - CI that runs on every pull request, with two jobs named exactly `check`
   and `e2e`, and deployment as the architecture document describes.
 - With `gh`, after the first push: squash merging only, auto-merge, branch

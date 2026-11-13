@@ -71,6 +71,13 @@ A project opts in through an empty `.nightshift` file in its root, which
 `/nightshift:spec` creates. Without it the hooks do nothing, so the plugin can
 stay enabled everywhere.
 
+There is no separate command to set a project up. `/nightshift:spec` also
+asks for the license and writes `LICENSE`, a first `README.md`, and a
+`.claude/settings.json` that enables the plugin for the project, so that a
+resumed session still has the hooks. If `approve` ever does nothing, the
+plugin is not loaded: check `/plugin`. The first slice completes the
+`README.md` and writes the project's `CLAUDE.md`.
+
 ## How it is built
 
 - [docs/requirements.md](docs/requirements.md): what the plugin must do.

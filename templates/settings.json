@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "lightsout-labs": {
+      "source": {
+        "source": "github",
+        "repo": "lightsout-labs/nightshift"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "nightshift@lightsout-labs": true
+  }
+}

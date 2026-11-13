@@ -107,3 +107,15 @@ def test_every_registered_hook_command_points_at_a_hook_file():
     for command in commands:
         (relative,) = re.findall(r"\$\{CLAUDE_PLUGIN_ROOT\}/([\w./-]+)", command)
         assert (ROOT / relative).is_file(), f"hooks.json names missing {relative}"
+
+
+def test_the_settings_template_enables_this_plugin_from_this_marketplace():
+    settings = load("templates/settings.json")
+    marketplace = load(".claude-plugin/marketplace.json")["name"]
+    plugin = load(".claude-plugin/plugin.json")
+    repository = plugin["repository"].removeprefix("https://github.com/")
+
+    assert settings["enabledPlugins"] == {f"{plugin['name']}@{marketplace}": True}
+    assert settings["extraKnownMarketplaces"] == {
+        marketplace: {"source": {"source": "github", "repo": repository}}
+    }
