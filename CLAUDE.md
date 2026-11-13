@@ -2,8 +2,9 @@
 
 A Claude Code plugin that runs a solo "software factory": the human reviews
 requirements and design and accepts the delivery; the agent does everything
-else. Requirements and agreed decisions are in `docs/requirements.md`. Read it
-before making design choices.
+else. Requirements and agreed decisions are in `docs/requirements.md`, and the
+plugin's structure is in `docs/architecture.md`. Read both before making design
+choices.
 
 ## What this repository is
 
@@ -28,13 +29,16 @@ to run when the document it depends on is not approved.
 
 ## Principles to preserve when writing skills
 
-- **Token economy**: one main agent, no subagent fan-out. The only exception is
-  one fresh-context review agent per slice. Keep progress in files so a slice
+- **Token economy**: one main agent. Skills never split work across agents or
+  run agents in parallel; the only agent a skill launches is one fresh-context
+  review agent per slice. Subagents that Claude Code starts on its own, for
+  example to search code, are fine. Keep progress in files so a slice
   can start from a fresh context. Anything a script can decide (format, lint,
   coverage, doc sync) belongs in `make check`, and rules that must not be
   broken (gates, `main` protection) belong in hooks, not in a prompt.
 - **Run to completion**: stop for the human only at the gates, on ambiguous
-  requirements, or after three failed fixes of the same problem.
+  requirements, after three failed fixes of the same problem, or between
+  slices so the human can clear the context.
 - **TDD**: failing tests first, then the code that passes them.
 - **Vertical slices**: every slice is testable end to end. The first slice is a
   walking skeleton that includes CI, e2e, and deployment.
