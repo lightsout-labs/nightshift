@@ -53,6 +53,8 @@ You cannot approve the document yourself, and a hook blocks the attempt.
 
 - **Changes**: apply them, commit, push, print what changed, and stop again.
 - **`approve`**: a hook sets the status and tells you. Commit the change with
-  the message `docs: approve requirements`, push, and squash-merge the pull
-  request. Then tell the human the requirements are approved and that design
-  is the next stage.
+  the message `docs: approve requirements`, push, squash-merge the pull
+  request, and switch to the updated `main`. With no pull request,
+  fast-forward `main` to the branch instead. Then, without waiting for the
+  human, read `${CLAUDE_PLUGIN_ROOT}/skills/design/SKILL.md` and follow it in
+  this session; the human's answers are useful context for the design.

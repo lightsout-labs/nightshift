@@ -45,6 +45,8 @@ docs/                  Requirements, this document, ADRs, backlog
 ```
 
 Skills are invoked as `/nightshift:spec`, `/nightshift:design`, and so on.
+A skill continues into another by reading that skill's file and following it:
+`spec` into `design` after the requirements gate, and `design` into `slice`.
 
 ## Target project contract
 
@@ -113,7 +115,7 @@ message to the human if a gate is closed.
 |---|---|---|---|
 | `spec` | Nothing | Asks clarifying questions until no requirement is ambiguous, then writes `docs/requirements.md` from the template | Stops at the requirements gate |
 | `design` | Requirements approved | Writes `docs/architecture.md` and ADRs, then runs `slice` | Stops at the design gate |
-| `slice` | Requirements approved, architecture exists | Writes `docs/backlog.md`: a walking skeleton first, then vertical slices with acceptance criteria | Returns to `design`, or stops if run alone |
+| `slice` | Requirements approved, architecture exists | Writes `docs/backlog.md`: a walking skeleton first, then vertical slices with acceptance criteria | Returns to `design`, or stops at a gate for the backlog if run alone |
 | `build` | Architecture and backlog approved | Builds the next slice (see below) | Stops after one slice |
 | `release` | All slices `Done` | Tags a version, writes the changelog, deploys, writes the delivery report | Stops at the acceptance gate |
 
@@ -187,10 +189,15 @@ tokens on what can be computed:
 |---|---|
 | `gate <doc>...` | Exit 0 if every document is `Approved`; otherwise names the ones that are not |
 | `next` | Prints the section of the next slice to build, or reports that none is left |
-| `set-status <slice> <status>` | Updates one slice's status in the backlog |
+| `set-status <slice> <status>` | Updates one slice's status in the backlog; refuses a second slice `In progress` |
+
+`next` and `set-status` read `docs/backlog.md` under the current directory,
+so skills run them from the project root. Both fail, naming the slice, when a
+slice has no valid status line.
 
 The same file is the one place that knows the target project contract: the
-marker file, the gated paths, and how a status line is read and approved.
+marker file, the gated paths, how a status line is read and approved, and
+how the backlog is split into slices.
 Hooks import it instead of repeating those rules.
 
 `templates/check-docs.py` is the document sync check. `build` copies it into

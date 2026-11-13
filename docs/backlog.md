@@ -74,7 +74,8 @@ Notes:
 
 ## S03: Design gate: architecture, ADRs, and backlog
 
-Status: Todo
+Status: Done
+PR: #5
 
 Acceptance criteria:
 - `/nightshift:design` refuses to run while the requirements are not
@@ -92,6 +93,22 @@ Acceptance criteria:
 - `nightshift.py set-status` changes one slice's status and refuses to make a
   second slice `In progress`.
 - `make e2e` extends the played project through the design gate.
+
+Notes:
+- `spec` and `design` chain by reading the next skill's file, because every
+  skill has `disable-model-invocation` and cannot be started by the agent.
+- Run alone, `slice` opens its own gate on the branch `docs/backlog` and sets
+  an approved backlog back to `Draft`; `Done` slices are kept.
+- `set-status` takes the status in any case, with a hyphen for the space, so
+  `in-progress` needs no quoting.
+- `next` exits 0 with a message when no slice is left; only a missing or
+  malformed backlog is an error.
+- The e2e test drafts the design from the templates, so a template that the
+  scripts cannot parse fails the build.
+- Without a remote, the skills fast-forward `main` after approval, since the
+  `main` protection hook blocks a commit there.
+- The four *(by hand)* criteria are not yet verified; they are when `cellar`
+  reaches its design stage.
 
 ## S04: Document sync check
 

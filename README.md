@@ -4,9 +4,9 @@ A Claude Code plugin that runs a solo "software factory". You review the
 requirements and the design, and you accept the delivery. The agent does
 everything else: documents, code, tests, CI, and releases.
 
-> **Status**: under construction. The `spec` stage, the requirements gate,
-> and `main` protection work today. The other stages are built slice by slice; see
-> [docs/backlog.md](docs/backlog.md).
+> **Status**: under construction. The `spec` and `design` stages, their
+> gates, and `main` protection work today. The other stages are built slice
+> by slice; see [docs/backlog.md](docs/backlog.md).
 
 ## Install
 
@@ -32,7 +32,10 @@ nowhere else.
 | Build | `/nightshift:build` | One slice per run: tests first, then code, then a pull request that merges itself when CI is green | Run `/clear` and the command again |
 | Release | `/nightshift:release` | A tagged version, a changelog, a deployment, and a delivery report | Accept |
 
-Only `/nightshift:spec` exists so far.
+`/nightshift:spec` and `/nightshift:design` exist so far. After you approve
+the requirements, design starts in the same session, so you normally type
+only the first command. `/nightshift:slice` rewrites the backlog alone, for
+when the plan changes after the design is approved.
 
 ### Gates
 
