@@ -239,7 +239,7 @@ the plugin can stay enabled in unrelated repositories.
 |---|---|---|
 | Gate protection | `PreToolUse` on `Edit`, `Write`, `Bash` | An edit would leave a file with an approved status line that it does not have now, or a shell command contains the text `Status: Approved` |
 | `main` protection | `PreToolUse` on `Bash` | `git commit` while on `main`, `git push` to `main`, or any force push |
-| Check before stopping | `Stop` | A slice is `In progress` and `make check` fails |
+| Check before stopping | `Stop` | A slice is `In progress` and `make check` fails, up to twice in a row |
 
 A fourth hook does not block anything; it is how the human approves:
 
@@ -270,11 +270,22 @@ Details:
   refspec and the current branch is `main`, or when it pushes every branch
   (`--all`, `--mirror`). Pushing tags is allowed from any branch. A force push
   is any `--force...` option, `-f`, or a `+` refspec.
-- The stop hook keeps a count of consecutive failures in `.git/nightshift/`,
-  which is never committed. On the third failure it lets the agent stop and
-  tells it to ask the human. A passing run resets the count.
+- The stop hook runs `make check` from the project root and blocks with the
+  end of its output, where a failing check names what failed. It keeps a
+  count of consecutive failures in `.git/nightshift/`, which is never
+  committed. A passing run resets the count.
+- The third failure in a row does not block. Claude Code delivers a hook's
+  text to the agent only by continuing the turn, so the hook returns the
+  output as feedback that tells the agent to ask the human, and lets the
+  next stop through without running the check. The count then starts again,
+  so the agent has three attempts after the human answers.
 - The stop hook skips `make check` when the working tree is unchanged since
-  the last passing run.
+  the last passing run. It compares a hash of every file that git does not
+  ignore, committed or not, which it takes by staging the files in an index
+  of its own under `.git/nightshift/`. The project's index is not touched.
+- The stop hook does nothing outside a git repository, and nothing when the
+  backlog is missing or cannot be read: without a slice `In progress` there
+  is no build to guard.
 - Matching shell commands is best effort. It stops mistakes, not a determined
   bypass. Server-side branch protection, set up in the walking skeleton, is the
   real guarantee for `main`.
