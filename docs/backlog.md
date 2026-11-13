@@ -12,7 +12,7 @@ a skill does are marked *(by hand)* and are verified by running the skill on
 
 ## S01: Walking skeleton: requirements gate, end to end
 
-Status: Todo
+Status: In progress
 
 Acceptance criteria:
 - `claude --plugin-dir .` loads the plugin and lists `/nightshift:spec`. The

@@ -39,6 +39,8 @@ scripts/
 templates/             Files copied into target projects
 tests/                 Tests for hooks, scripts, and plugin structure
 Makefile               `make check` and `make e2e` for this repository
+pyproject.toml         Development tools and their settings; nothing is packaged
+.github/workflows/     CI: the `check` and `e2e` jobs
 docs/                  Requirements, this document, ADRs, backlog
 ```
 
@@ -187,6 +189,10 @@ tokens on what can be computed:
 | `next` | Prints the section of the next slice to build, or reports that none is left |
 | `set-status <slice> <status>` | Updates one slice's status in the backlog |
 
+The same file is the one place that knows the target project contract: the
+marker file, the gated paths, and how a status line is read and approved.
+Hooks import it instead of repeating those rules.
+
 `templates/check-docs.py` is the document sync check. `build` copies it into
 the project as `scripts/check-docs.py` so that CI can run it without the
 plugin installed (see [ADR 0003](adr/0003-vendor-the-document-check.md)). It
@@ -204,7 +210,7 @@ the plugin can stay enabled in unrelated repositories.
 
 | Hook | Event | Blocks when |
 |---|---|---|
-| Gate protection | `PreToolUse` on `Edit`, `Write`, `Bash` | An edit would add `Status: Approved` to a file that does not have it, or a shell command contains that text |
+| Gate protection | `PreToolUse` on `Edit`, `Write`, `Bash` | An edit would leave a file with an approved status line that it does not have now, or a shell command contains the text `Status: Approved` |
 | `main` protection | `PreToolUse` on `Bash` | `git commit` while on `main`, `git push` to `main`, or any force push |
 | Check before stopping | `Stop` | A slice is `In progress` and `make check` fails |
 
@@ -223,9 +229,12 @@ untouched.
 
 Details:
 
+- Gate protection decides on the result of an edit, not on its text: it
+  applies the edit in memory and blocks when the file would gain an approved
+  status line. Replacing the single word `Draft` is therefore blocked, and
+  quoting the status in a document body is not.
 - Gate protection also blocks shell commands that start a nested `claude`
   session, since a prompt submitted there would count as human input.
-
 - The stop hook keeps a count of consecutive failures in `.git/nightshift/`,
   which is never committed. On the third failure it lets the agent stop and
   tells it to ask the human. A passing run resets the count.
@@ -247,7 +256,8 @@ skeleton slice writes them to satisfy the contract above.
 
 Hooks and scripts are Python 3 using only the standard library, so the plugin
 needs no install step (see [ADR 0001](adr/0001-python-standard-library.md)).
-Development uses `ruff` for format and lint and `pytest` with coverage.
+Development uses `ruff` for format and lint and `pytest` with coverage, run
+through `uv`, which installs them from `pyproject.toml` on first use.
 
 ## Testing this repository
 

@@ -1,0 +1,11 @@
+{
+  "name": "nightshift",
+  "description": "A solo software factory: the human reviews requirements and design and accepts the delivery; the agent does everything else.",
+  "author": {
+    "name": "lightsout-labs",
+    "url": "https://github.com/lightsout-labs"
+  },
+  "homepage": "https://github.com/lightsout-labs/nightshift",
+  "repository": "https://github.com/lightsout-labs/nightshift",
+  "license": "MIT"
+}

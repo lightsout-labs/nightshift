@@ -1,0 +1,14 @@
+{
+  "name": "lightsout-labs",
+  "owner": {
+    "name": "lightsout-labs"
+  },
+  "description": "The nightshift software factory plugin.",
+  "plugins": [
+    {
+      "name": "nightshift",
+      "source": "./",
+      "description": "A solo software factory: the human reviews requirements and design and accepts the delivery; the agent does everything else."
+    }
+  ]
+}
