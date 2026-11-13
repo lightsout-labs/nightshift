@@ -55,16 +55,16 @@ Write code until `make check` and `make e2e` pass.
 
 ## 4. Review
 
-Once per slice. Skip it if `Notes` already has a review result.
+Once per slice. If `.git/nightshift/review-Snn.md` exists, go to 3.
 
-1. Update every document the slice affects: architecture, README, ADRs.
-   Commit. Run `mkdir -p .git/nightshift`, then
+1. Update every document the slice affects: architecture, README, ADRs. Run
+   `make check` and commit. Run `mkdir -p .git/nightshift`, then
    `git diff main...HEAD > .git/nightshift/review.diff` and
    `NS next > .git/nightshift/slice.md`.
 2. Launch the `nightshift:slice-reviewer` agent with the prompt "Review the
-   slice." and nothing else: it must not inherit your view of the work.
-3. Add its result line to the slice's `Notes`. Fix every blocking finding,
-   and each minor one that is right, as in step 3. Do not review again.
+   slice." and no word more. Save its reply as `.git/nightshift/review-Snn.md`.
+3. Fix every blocking finding in that file, and each minor one that is
+   right, as in step 3. Do not review again.
 
 ## 5. Deliver
 

@@ -9,7 +9,6 @@ from conftest import ROOT
 SKILL_LINE_BUDGET = 80
 SKILLS = sorted((ROOT / "skills").glob("*/SKILL.md"))
 AGENTS = sorted((ROOT / "agents").glob("*.md"))
-READ_ONLY_TOOLS = {"Read", "Grep", "Glob"}
 
 
 def load(relative):
@@ -74,16 +73,17 @@ def test_the_slice_reviewer_is_the_only_agent_and_is_read_only():
 
     assert fields["name"] == agent.stem == "slice-reviewer"
     assert fields["description"]
-    tools = {tool.strip() for tool in fields["tools"].split(",")}
-    assert tools and tools <= READ_ONLY_TOOLS
+    assert fields["tools"] == "Read"
     assert "disallowedTools" not in fields
     assert len(agent.read_text().splitlines()) <= SKILL_LINE_BUDGET
 
 
 def test_only_the_build_skill_launches_the_reviewer():
-    launching = [s.parent.name for s in SKILLS if "slice-reviewer" in s.read_text()]
+    launching = {
+        path.parent.name for path in SKILL_FILES if "slice-reviewer" in path.read_text()
+    }
 
-    assert launching == ["build"]
+    assert launching == {"build"}
     build = (ROOT / "skills" / "build" / "SKILL.md").read_text()
     assert "`nightshift:slice-reviewer`" in build
 

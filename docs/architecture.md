@@ -196,10 +196,12 @@ never repeats the diff as prompt text. The prompt is the fixed sentence
 "Review the slice.", so nothing of the builder's view of its own work reaches
 the reviewer.
 
-There is one round. `build` writes the result line to the slice's `Notes`,
-which is how a resumed run knows not to review again, and fixes every
-blocking finding and each minor one that is right. The findings and what was
-done about each go into the pull request description.
+There is one round. `build` runs `make check` on the updated documents
+before the review, and saves the reviewer's reply as
+`.git/nightshift/review-Snn.md`. It then fixes every blocking finding and
+each minor one that is right. A resumed run that finds the file does not
+review again and carries on with the findings in it. The findings and what
+was done about each go into the pull request description.
 
 ## Scripts
 
@@ -325,7 +327,7 @@ through `uv`, which installs them from `pyproject.toml` on first use.
 | Level | Covers | How |
 |---|---|---|
 | Unit | Backlog and status parsing, each `check-docs` rule, each hook's decision | `pytest`, through each script's command-line interface |
-| Structure | Manifests are valid, every skill has frontmatter and stays under a line budget, every plugin file that a skill names exists, the reviewer is the only agent, has no tool but read-only ones, and is launched only by `build` | `pytest` |
+| Structure | Manifests are valid, every skill has frontmatter and stays under a line budget, every plugin file that a skill names exists, the reviewer is the only agent, has no tool but `Read`, and is named only by `build` | `pytest` |
 | End to end (`make e2e`) | Hooks and scripts against a temporary git repository that plays a target project through all stages | `pytest`, with hook input fed as Claude Code sends it |
 | Skills | Whether the prompts produce the intended behavior | Building `cellar`; problems found there become slices here |
 
