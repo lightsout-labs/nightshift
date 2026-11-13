@@ -1,6 +1,6 @@
 # Requirements
 
-Status: Draft
+Status: Approved
 
 ## Original requirements
 
@@ -63,3 +63,42 @@ These were agreed during planning and refine the requirements above.
   later example, to show that the factory is language-agnostic.
 - **Language-agnostic contract**: the factory relies on a single `make check`
   entry point in each project and does not depend on a specific toolchain.
+- **Progress state**: each project keeps its backlog and slice status in
+  Markdown files under `docs/`, versioned with the code. The files are the only
+  source of truth; a slice starts from a fresh context by reading them.
+- **`make check` scope**: format check, lint, unit tests, a coverage threshold,
+  and a document sync check. It must be fast enough to run on every change.
+  - The coverage threshold is set per project in its design document and
+    applies to core logic. It is a floor against regressions, not a target.
+  - The document sync check fails on stale documents, such as a gated document
+    without a `Status` header or a finished slice whose backlog entry is not
+    updated.
+- **E2e tests**: a separate `make e2e` target, kept out of `make check` so the
+  local loop stays fast. It runs before a slice's pull request is opened and as
+  a required CI check.
+- **Retry limit**: during `build`, the agent stops and asks the human after
+  three failed attempts to fix the same problem.
+- **Independent code review**: because the human does not review code, each
+  slice gets one review by a separate agent. This is the only exception to the
+  single-agent rule.
+  - It runs once per slice, after `make check` and `make e2e` pass and before
+    the pull request is opened.
+  - The reviewer starts from a fresh context and reads only the diff, the
+    slice's backlog entry, and the architecture document.
+  - It checks what scripts cannot: conformance to the acceptance criteria,
+    module depth and interface leaks, meaningful tests, and obvious security
+    problems.
+  - There is a single round. Findings are fixed without a second review, and
+    failed fixes count toward the retry limit.
+  - The review result is recorded in the pull request description.
+- **Hooks**: the plugin ships three hooks, so these rules are enforced
+  deterministically rather than by prompt.
+  - Gate protection: the agent cannot set a document to `Status: Approved`.
+    Only the human approves.
+  - `main` protection: commits on `main`, direct pushes to it, and force pushes
+    are blocked locally.
+  - Check before stopping: during `build`, the agent cannot stop while
+    `make check` fails, bounded by the retry limit.
+  - There is no format-on-edit hook; `make check` already covers formatting.
+- **Deployment of `cellar`**: the web version is deployed to GitHub Pages by
+  the `release` stage.
