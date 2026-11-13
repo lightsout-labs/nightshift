@@ -75,6 +75,7 @@ Notes:
 ## S03: Design gate: architecture, ADRs, and backlog
 
 Status: Done
+PR: #5
 
 Acceptance criteria:
 - `/nightshift:design` refuses to run while the requirements are not
