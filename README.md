@@ -4,9 +4,10 @@ A Claude Code plugin that runs a solo "software factory". You review the
 requirements and the design, and you accept the delivery. The agent does
 everything else: documents, code, tests, CI, and releases.
 
-> **Status**: under construction. The `spec` and `design` stages, their
-> gates, `main` protection, and the document check work today. The other stages are built slice
-> by slice; see [docs/backlog.md](docs/backlog.md).
+> **Status**: under construction. The `spec`, `design`, and `build` stages,
+> the gates, `main` protection, and the document check work today. The slice
+> review and `release` are built slice by slice; see
+> [docs/backlog.md](docs/backlog.md).
 
 ## Install
 
@@ -18,7 +19,8 @@ In Claude Code:
 ```
 
 The plugin needs `python3` on the path and nothing else. For pull requests it
-uses the GitHub CLI, `gh`, if the project has a GitHub remote.
+uses the GitHub CLI, `gh`, if the project has a GitHub remote. `build`
+requires both.
 
 ## Workflow
 
@@ -32,9 +34,10 @@ nowhere else.
 | Build | `/nightshift:build` | One slice per run: tests first, then code, then a pull request that merges itself when CI is green | Run `/clear` and the command again |
 | Release | `/nightshift:release` | A tagged version, a changelog, a deployment, and a delivery report | Accept |
 
-`/nightshift:spec` and `/nightshift:design` exist so far. After you approve
-the requirements, design starts in the same session, so you normally type
-only the first command. `/nightshift:slice` rewrites the backlog alone, for
+Every command but `/nightshift:release` exists so far. After you approve
+the requirements, design starts in the same session. `/nightshift:build`
+builds one slice and stops, so that each slice starts from a clean context;
+it resumes a slice that was interrupted. `/nightshift:slice` rewrites the backlog alone, for
 when the plan changes after the design is approved.
 
 ### Gates
