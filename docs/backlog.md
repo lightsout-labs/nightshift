@@ -204,7 +204,7 @@ Notes:
 
 ## S07: Independent slice review
 
-Status: Todo
+Status: In progress
 
 Acceptance criteria:
 - The `slice-reviewer` agent is read-only, and its definition passes the
@@ -214,6 +214,22 @@ Acceptance criteria:
   section, and the architecture document *(by hand)*.
 - Blocking findings are fixed without a second review, and the review result
   appears in the pull request description *(by hand)*.
+
+Notes:
+- The reviewer's only tool is `Read`. `build` writes the diff and the
+  slice's section to `.git/nightshift/review.diff` and `slice.md`, and the
+  prompt is the fixed sentence "Review the slice."
+- `build` updates the documents before the review, not after, so the
+  reviewer sees an architecture change together with the code.
+- The result line goes into the slice's `Notes`; a resumed run that finds it
+  there does not review again.
+- The line budget stays at 80. The walking skeleton list moved to
+  `skills/build/walking-skeleton.md`, which is read for that slice only.
+  Files beside a skill write `PLUGIN/` for the plugin root, because
+  `${CLAUDE_PLUGIN_ROOT}` is only replaced in `SKILL.md`; the structure tests
+  check both spellings.
+- The two *(by hand)* criteria are not yet verified; they are when `cellar`
+  builds its next slice.
 
 ## S08: Release and acceptance
 

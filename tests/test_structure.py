@@ -8,6 +8,8 @@ from conftest import ROOT
 
 SKILL_LINE_BUDGET = 80
 SKILLS = sorted((ROOT / "skills").glob("*/SKILL.md"))
+AGENTS = sorted((ROOT / "agents").glob("*.md"))
+READ_ONLY_TOOLS = {"Read", "Grep", "Glob"}
 
 
 def load(relative):
@@ -51,12 +53,45 @@ def test_skill_has_frontmatter_and_stays_within_the_line_budget(skill):
     assert len(skill.read_text().splitlines()) <= SKILL_LINE_BUDGET
 
 
-@pytest.mark.parametrize("skill", SKILLS, ids=lambda skill: skill.parent.name)
-def test_every_plugin_file_a_skill_names_exists(skill):
-    named = re.findall(r"\$\{CLAUDE_PLUGIN_ROOT\}/([\w./-]+)", skill.read_text())
+SKILL_FILES = sorted((ROOT / "skills").glob("*/*.md"))
+
+
+@pytest.mark.parametrize(
+    "path", SKILL_FILES, ids=lambda path: f"{path.parent.name}/{path.name}"
+)
+def test_every_plugin_file_a_skill_names_exists(path):
+    named = re.findall(
+        r"(?:\$\{CLAUDE_PLUGIN_ROOT\}|PLUGIN)/([\w./-]+)", path.read_text()
+    )
 
     for relative in named:
-        assert (ROOT / relative).is_file(), f"{skill} names missing {relative}"
+        assert (ROOT / relative).is_file(), f"{path} names missing {relative}"
+
+
+def test_the_slice_reviewer_is_the_only_agent_and_is_read_only():
+    (agent,) = AGENTS
+    fields = frontmatter(agent)
+
+    assert fields["name"] == agent.stem == "slice-reviewer"
+    assert fields["description"]
+    tools = {tool.strip() for tool in fields["tools"].split(",")}
+    assert tools and tools <= READ_ONLY_TOOLS
+    assert "disallowedTools" not in fields
+    assert len(agent.read_text().splitlines()) <= SKILL_LINE_BUDGET
+
+
+def test_only_the_build_skill_launches_the_reviewer():
+    launching = [s.parent.name for s in SKILLS if "slice-reviewer" in s.read_text()]
+
+    assert launching == ["build"]
+    build = (ROOT / "skills" / "build" / "SKILL.md").read_text()
+    assert "`nightshift:slice-reviewer`" in build
+
+
+def test_the_pull_request_template_has_a_place_for_the_review_result():
+    template = (ROOT / "templates" / "pull-request.md").read_text()
+
+    assert "\n## Review\n" in template
 
 
 def test_every_registered_hook_command_points_at_a_hook_file():
