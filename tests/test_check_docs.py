@@ -128,6 +128,20 @@ def test_passes_before_the_design_exists(tmp_path):
     assert run_check_docs(cwd=tmp_path).returncode == 0
 
 
+def test_passes_after_a_release_has_emptied_the_backlog(consistent):
+    # `release` moves the slices to a file of their own, which is not gated.
+    backlog = consistent / "docs" / "backlog.md"
+    preamble, slices = backlog.read_text().split("## ", 1)
+    backlog.write_text(preamble)
+    archive = consistent / "docs" / "backlog" / "v1.0.0.md"
+    archive.parent.mkdir()
+    archive.write_text("# Backlog of v1.0.0\n\n## " + slices)
+
+    result = run_check_docs(cwd=consistent)
+
+    assert result.returncode == 0, result.stderr
+
+
 @pytest.mark.parametrize(
     ("relative", "old", "new", "reported"),
     [

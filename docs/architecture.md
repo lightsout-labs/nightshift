@@ -66,6 +66,7 @@ and scripts depend on nothing else.
 | `docs/backlog.md` | `slice`, updated by `build` | Yes |
 | `docs/backlog/vX.Y.Z.md` | `release` | No. The finished slices of one release |
 | `docs/delivery/vX.Y.Z.md` | `release` | Yes; approval is the acceptance |
+| `CHANGELOG.md` | `release` | No. One section per version, newest first |
 | `scripts/check-docs.py` | `build`, in the walking skeleton | No |
 | `CLAUDE.md` | `build`, in the walking skeleton | No. Commands and rules for a fresh context |
 
@@ -170,6 +171,9 @@ slice is already `In progress`, the run resumes it from its `Notes`.
 A failed fix is recorded in the slice's `Notes`. After three failed fixes of
 the same problem, the skill stops and asks the human.
 
+When the backlog has no slices at all, which is its state between releases,
+`nightshift.py next` says so, and `build` and `release` have nothing to do.
+
 `build` needs a GitHub remote and `gh`, because a `Done` slice must name its
 pull request. In every slice it compares the project's `check-docs.py` with
 the plugin's by `--version` and copies a newer one.
@@ -209,20 +213,52 @@ each minor one that is right. A resumed run that finds the file does not
 review again and carries on with the findings in it. The findings and what
 was done about each go into the pull request description.
 
+### Releasing
+
+`/nightshift:release` runs when every slice is `Done`, and has two pull
+requests, because the version is tagged on `main` and the human accepts
+something that is already deployed:
+
+1. Choose the version: `v0.1.0` first, then the latest tag with the minor
+   number raised, the patch number when every slice is a fix, or the major
+   number only when the requirements say the release breaks compatibility.
+2. On the branch `chore/release-vX.Y.Z`: add the version's section to
+   `CHANGELOG.md`, with one line per slice, set the version where the project
+   records it, and run `nightshift.py archive`. The pull request merges
+   itself when CI is green.
+3. Tag the merged `main` and push the tag, then deploy and verify as the
+   project's architecture document describes.
+4. On the branch `docs/delivery-vX.Y.Z`: write the delivery report from the
+   template as a draft, open a pull request, and stop at the acceptance gate.
+5. On `approve`, commit the status, merge, and stop. The release is closed.
+
+The report lists every requirement with its result and the slices that
+deliver it, how to try the delivery, and known limits. At the gate, a change
+to the report is applied; a change to the product belongs to the next release
+and is recorded under known limits.
+
+The files are the state, so an interrupted run resumes: a `Draft` report
+means the release waits at the gate, and an archived backlog with no report
+of the same version means the run stopped between steps 2 and 4. Like
+`build`, `release` needs a GitHub remote and `gh`.
+
 ## Scripts
 
-`scripts/nightshift.py` has three subcommands, so that skills never spend
+`scripts/nightshift.py` has four subcommands, so that skills never spend
 tokens on what can be computed:
 
 | Subcommand | Result |
 |---|---|
 | `gate <doc>...` | Exit 0 if every document is `Approved`; otherwise names the ones that are not |
-| `next` | Prints the section of the next slice to build, or reports that none is left |
+| `next` | Prints the section of the next slice to build, or reports that none is left, or that the backlog has no slices |
 | `set-status <slice> <status>` | Updates one slice's status in the backlog; refuses a second slice `In progress` |
+| `archive <version>` | Moves every slice to `docs/backlog/<version>.md`, leaving the backlog's title, status, and introduction; refuses when a slice is not `Done`, when there is none, or when the file exists |
 
-`next` and `set-status` read `docs/backlog.md` under the current directory,
-so skills run them from the project root. Both fail, naming the slice, when a
-slice has no valid status line.
+`next`, `set-status`, and `archive` read `docs/backlog.md` under the current
+directory, so skills run them from the project root. All fail, naming the
+slice, when a slice has no valid status line. `archive` moves the text as it
+is, so a relative link inside a slice breaks and the document check reports
+it.
 
 The same file is the one place that knows the target project contract: the
 marker file, the gated paths, how a status line is read and approved, and

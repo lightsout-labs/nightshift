@@ -133,3 +133,69 @@ def test_a_missing_or_malformed_backlog_is_an_error_that_names_the_cause(
     assert "docs/backlog.md" in missing.stderr
     assert malformed.returncode == 1
     assert "S01" in malformed.stderr
+
+
+EMPTY = "# Backlog\n\nStatus: Approved\n\nSlices, built in this order.\n"
+
+
+def test_next_says_so_when_the_backlog_has_no_slices(backlog):
+    backlog.write_text(EMPTY)
+
+    result = run_script("next", cwd=backlog.parent.parent)
+
+    assert result.returncode == 0
+    assert "has no slices" in result.stdout
+    assert "No slice is left" not in result.stdout
+
+
+def test_archive_moves_every_slice_to_the_file_of_the_release(backlog):
+    project = backlog.parent.parent
+    backlog.write_text(BACKLOG.replace("Status: Todo", "Status: Done\nPR: #2"))
+    slices = backlog.read_text().removeprefix(EMPTY + "\n")
+
+    result = run_script("archive", "v0.1.0", cwd=project)
+
+    assert result.returncode == 0
+    assert "docs/backlog/v0.1.0.md" in result.stdout
+    # The backlog keeps its title, status, and introduction, and nothing else.
+    assert backlog.read_text() == EMPTY
+    archive = (project / "docs" / "backlog" / "v0.1.0.md").read_text()
+    assert archive.startswith("# Backlog of v0.1.0\n")
+    assert archive.endswith(slices)
+    assert "has no slices" in run_script("next", cwd=project).stdout
+
+
+@pytest.mark.parametrize(
+    ("text", "version", "named"),
+    [
+        (BACKLOG, "v0.1.0", "S02"),
+        (EMPTY, "v0.1.0", "no slices"),
+        (BACKLOG.replace("Todo", "Done"), "0.1", "vMAJOR.MINOR.PATCH"),
+    ],
+    ids=["a slice is not done", "nothing to archive", "not a version"],
+)
+def test_archive_refuses_and_changes_nothing(backlog, text, version, named):
+    backlog.write_text(text)
+
+    result = run_script("archive", version, cwd=backlog.parent.parent)
+
+    assert result.returncode != 0
+    assert named in result.stderr
+    assert backlog.read_text() == text
+    assert not (backlog.parent / "backlog").exists()
+
+
+def test_archive_never_overwrites_an_earlier_release(backlog):
+    project = backlog.parent.parent
+    done = BACKLOG.replace("Status: Todo", "Status: Done")
+    backlog.write_text(done)
+    earlier = project / "docs" / "backlog" / "v0.1.0.md"
+    earlier.parent.mkdir()
+    earlier.write_text("# Backlog of v0.1.0\n")
+
+    result = run_script("archive", "v0.1.0", cwd=project)
+
+    assert result.returncode == 1
+    assert "v0.1.0" in result.stderr
+    assert backlog.read_text() == done
+    assert earlier.read_text() == "# Backlog of v0.1.0\n"

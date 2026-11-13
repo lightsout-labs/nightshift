@@ -238,7 +238,7 @@ Notes:
 
 ## S08: Release and acceptance
 
-Status: Todo
+Status: In progress
 
 Acceptance criteria:
 - `/nightshift:release` refuses to run while any slice is not `Done`
