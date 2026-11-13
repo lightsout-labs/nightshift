@@ -124,6 +124,15 @@ These were agreed during planning and refine the requirements above.
 - **Rules outside the skills**: the project's `CLAUDE.md` repeats the rules
   on simplicity, deep modules, and tests in one line each, so they also hold
   for work done without a skill.
+- **Repository documents**: there is no separate initialization command;
+  `spec` is where a project starts. It asks for the license and writes
+  `LICENSE` and a first `README.md` with the requirements. The walking
+  skeleton adds how to run the project to the `README.md` and writes
+  `CLAUDE.md`, because the commands are not known before the design.
+- **Plugin loading**: `spec` writes a `.claude/settings.json` that enables
+  the plugin for the project. A session that is resumed or started without
+  the plugin would otherwise run without the hooks, and nothing could report
+  it: `approve` would silently do nothing.
 - **Backlog size**: `release` moves the finished slices to
   `docs/backlog/vX.Y.Z.md`, so `docs/backlog.md` holds only the release in
   progress.

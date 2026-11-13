@@ -29,6 +29,7 @@ and your recommendation first.
   or decline. This is where ambition is agreed; later stages build exactly
   what was agreed.
 - Make each quality bar observable: a reference product, or named behaviors.
+- Ask which license the project has, unless a `LICENSE` file exists.
 - Do not ask what you can decide yourself or what belongs to design.
 - Stop asking when further answers would not change the document.
 
@@ -41,11 +42,20 @@ and your recommendation first.
    human's answers under Decisions.
 2. Create the empty marker file `.nightshift` in the project root. It turns
    the plugin's hooks on for this project.
+3. Write the repository's documents, where they do not exist yet:
+   - `LICENSE`: the full text of the chosen license, with this year and
+     `git config user.name` as the holder. No file if the human wants none.
+   - `README.md`: the project's name, the goal in one or two sentences, and
+     a link to `docs/requirements.md`. Keep what an existing one says.
+   - `.claude/settings.json`: a copy of
+     `${CLAUDE_PLUGIN_ROOT}/templates/settings.json`, which loads this
+     plugin in every session in the project. Add its two keys to an
+     existing file instead.
 
 ## 4. Open the gate
 
 1. If the directory is not a git repository, run `git init`.
-2. Create the branch `docs/requirements`, commit both files with the message
+2. Create the branch `docs/requirements`, commit these files with the message
    `docs: draft requirements`, and push.
 3. Open a pull request with the same title. If there is no remote or `gh`
    fails, say so and carry on without one.

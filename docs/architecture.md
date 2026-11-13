@@ -60,6 +60,9 @@ and scripts depend on nothing else.
 | Path | Written by | Gated |
 |---|---|---|
 | `.nightshift` | `spec` | No. Empty marker file; hooks do nothing without it |
+| `.claude/settings.json` | `spec` | No. Enables the plugin, so every session in the project loads the hooks |
+| `LICENSE` | `spec` | No. The license the human chose; absent if they want none |
+| `README.md` | `spec`, completed by `build` in the walking skeleton | No. Goal first; how to run, test, and deploy once that exists |
 | `docs/requirements.md` | `spec` | Yes |
 | `docs/architecture.md` | `design` | Yes |
 | `docs/adr/NNNN-<title>.md` | `design`, `build` | No |
@@ -121,7 +124,7 @@ message to the human if a gate is closed.
 
 | Skill | Requires | Does | Ends |
 |---|---|---|---|
-| `spec` | Nothing | Asks clarifying questions until no requirement is ambiguous, proposes features and quality bars for the human to accept or decline, then writes `docs/requirements.md` from the template | Stops at the requirements gate |
+| `spec` | Nothing | Asks clarifying questions until no requirement is ambiguous, proposes features and quality bars for the human to accept or decline, then writes `docs/requirements.md` from the template, `LICENSE`, a first `README.md`, and `.claude/settings.json` | Stops at the requirements gate |
 | `design` | Requirements approved | Writes `docs/architecture.md` and ADRs, then runs `slice` | Stops at the design gate |
 | `slice` | Requirements approved, architecture exists | Writes `docs/backlog.md`: a walking skeleton first, then vertical slices with acceptance criteria | Returns to `design`, or stops at a gate for the backlog if run alone |
 | `build` | Architecture and backlog approved | Builds the next slice (see below) | Stops after one slice |
@@ -357,9 +360,17 @@ Details:
 
 `templates/` holds the files that skills copy into a project: the requirements
 document, architecture document, ADR, backlog, delivery report, pull request
-description, a short project `CLAUDE.md`, and `check-docs.py`. There is no CI
-or Makefile template, because those depend on the toolchain; the walking
-skeleton slice writes them to satisfy the contract above.
+description, a short project `CLAUDE.md`, `check-docs.py`, and the project's
+`settings.json`. There is no CI or Makefile template, because those depend on
+the toolchain; the walking skeleton slice writes them to satisfy the contract
+above. `README.md` and `LICENSE` have no template either: the first depends
+on the project, and the agent knows the text of the common licenses.
+
+`settings.json` names this repository as a marketplace and enables the
+plugin from it. Claude Code then offers to install the plugin when the
+project is trusted, and loads it in every session there, including one that
+is resumed. Without it, a session started without the plugin has no hooks,
+and typing `approve` does nothing.
 
 ## Implementation language
 
@@ -373,7 +384,7 @@ through `uv`, which installs them from `pyproject.toml` on first use.
 | Level | Covers | How |
 |---|---|---|
 | Unit | Backlog and status parsing, each `check-docs` rule, each hook's decision | `pytest`, through each script's command-line interface |
-| Structure | Manifests are valid, every skill has frontmatter and stays under a line budget, every plugin file that a skill names exists, the reviewer is the only agent, has no tool but `Read`, and is named only by `build` | `pytest` |
+| Structure | Manifests are valid, every skill has frontmatter and stays under a line budget, every plugin file that a skill names exists, the settings template names this marketplace and plugin, the reviewer is the only agent, has no tool but `Read`, and is named only by `build` | `pytest` |
 | End to end (`make e2e`) | Hooks and scripts against a temporary git repository that plays a target project through all stages | `pytest`, with hook input fed as Claude Code sends it |
 | Skills | Whether the prompts produce the intended behavior | Building `cellar`; problems found there become slices here |
 
