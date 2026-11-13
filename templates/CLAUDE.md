@@ -14,7 +14,11 @@ workflow. What it must do is in `docs/requirements.md`, how it is built is in
 ## Rules
 
 - Work on one slice at a time, with `/nightshift:build`. Tests come first.
-- Tests go through public interfaces only.
+- The simplest design and code that meet the requirements. Nothing for a
+  need that is not stated.
+- Deep modules: small interfaces that hide substantial behavior.
+- Tests go through public interfaces only and cover the core logic. None is
+  redundant or written to raise coverage.
 - Never commit to `main`. One branch and one squash-merged pull request per
   slice.
 - Code, comments, documents, and commit messages are in English.

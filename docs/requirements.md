@@ -40,6 +40,8 @@ Translated from the owner's original notes.
     the workflow.
 16. Decide how many repositories are needed and how to name them; the owner
     then creates them on GitHub.
+17. Do not over-engineer. Always choose the simplest design that meets the
+    requirements, in the architecture and the design as well as in the code.
 
 ## Decisions so far
 
@@ -95,11 +97,36 @@ These were agreed during planning and refine the requirements above.
   - The reviewer starts from a fresh context and reads only the diff, the
     slice's backlog entry, and the architecture document.
   - It checks what scripts cannot: conformance to the acceptance criteria,
-    module depth and interface leaks, meaningful tests, and obvious security
-    problems.
+    module depth, interface leaks and over-engineering, meaningful tests, and
+    obvious security problems.
   - There is a single round. Findings are fixed without a second review, and
     failed fixes count toward the retry limit.
   - The review result is recorded in the pull request description.
+- **Simplest design**: it applies at every level. `spec` adds no requirement
+  the human did not ask for, `design` chooses the fewest components, layers,
+  and dependencies that meet the requirements, `slice` plans nothing beyond
+  them, `build` writes nothing that the slice's criteria do not need, and
+  the review reports what goes beyond them. A need that the requirements
+  state, such as a later platform, is not speculation. The rule limits scope
+  and structure, not quality: `spec` still raises what seems missing as a
+  question, a deep module with one caller is not over-engineering, and
+  errors and edge cases are handled with care.
+- **Ambition is agreed in `spec`**: the agent's ideas, such as a feature the
+  human did not think of or a more polished UI, are proposed during `spec`
+  as options. What the human accepts becomes a numbered requirement with an
+  observable quality bar, `slice` turns it into acceptance criteria in every
+  slice it applies to, and `build` must meet them. Later stages invent
+  nothing.
+- **Design practices**: besides deep modules, `design` keeps core logic free
+  of I/O, UI, and framework code, and gives each piece of knowledge one
+  owning module. Other practices are used only where a requirement calls for
+  them.
+- **Rules outside the skills**: the project's `CLAUDE.md` repeats the rules
+  on simplicity, deep modules, and tests in one line each, so they also hold
+  for work done without a skill.
+- **Backlog size**: `release` moves the finished slices to
+  `docs/backlog/vX.Y.Z.md`, so `docs/backlog.md` holds only the release in
+  progress.
 - **Hooks**: the plugin ships four hooks, so these rules are enforced
   deterministically rather than by prompt.
   - Gate protection: the agent cannot set a document to `Status: Approved`.

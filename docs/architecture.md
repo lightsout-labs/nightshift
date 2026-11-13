@@ -64,6 +64,7 @@ and scripts depend on nothing else.
 | `docs/architecture.md` | `design` | Yes |
 | `docs/adr/NNNN-<title>.md` | `design`, `build` | No |
 | `docs/backlog.md` | `slice`, updated by `build` | Yes |
+| `docs/backlog/vX.Y.Z.md` | `release` | No. The finished slices of one release |
 | `docs/delivery/vX.Y.Z.md` | `release` | Yes; approval is the acceptance |
 | `scripts/check-docs.py` | `build`, in the walking skeleton | No |
 | `CLAUDE.md` | `build`, in the walking skeleton | No. Commands and rules for a fresh context |
@@ -97,6 +98,9 @@ Notes:
 - `Notes` holds what a fresh context needs to resume: decisions made in the
   slice and failed fix attempts.
 - `PR` and `Notes` are added when there is something to record.
+- `release` moves the slices of a release to `docs/backlog/vX.Y.Z.md`, so
+  the backlog holds only the release in progress and stays readable. Slice
+  numbers continue across releases.
 
 ### Make targets
 
@@ -116,11 +120,11 @@ message to the human if a gate is closed.
 
 | Skill | Requires | Does | Ends |
 |---|---|---|---|
-| `spec` | Nothing | Asks clarifying questions until no requirement is ambiguous, then writes `docs/requirements.md` from the template | Stops at the requirements gate |
+| `spec` | Nothing | Asks clarifying questions until no requirement is ambiguous, proposes features and quality bars for the human to accept or decline, then writes `docs/requirements.md` from the template | Stops at the requirements gate |
 | `design` | Requirements approved | Writes `docs/architecture.md` and ADRs, then runs `slice` | Stops at the design gate |
 | `slice` | Requirements approved, architecture exists | Writes `docs/backlog.md`: a walking skeleton first, then vertical slices with acceptance criteria | Returns to `design`, or stops at a gate for the backlog if run alone |
 | `build` | Architecture and backlog approved | Builds the next slice (see below) | Stops after one slice |
-| `release` | All slices `Done` | Tags a version, writes the changelog, deploys, writes the delivery report | Stops at the acceptance gate |
+| `release` | All slices `Done` | Tags a version, writes the changelog, deploys, archives the backlog, writes the delivery report | Stops at the acceptance gate |
 
 ### Gates
 
@@ -152,7 +156,8 @@ slice is already `In progress`, the run resumes it from its `Notes`.
 1. Branch from the latest `main` and set the slice to `In progress`.
 2. Write failing tests from the acceptance criteria: e2e for the slice's main
    path, unit tests for core logic.
-3. Write code until `make check` and `make e2e` pass.
+3. Write code until `make check` and `make e2e` pass, with nothing beyond
+   the slice's criteria.
 4. Update the affected documents, so that the review covers them, then run
    the `slice-reviewer` agent once and fix its findings.
 5. Open a pull request with the review result in the description. Set the
@@ -186,8 +191,9 @@ the skill.
 `Read`. It reads the branch diff, the slice's backlog section, and
 `docs/architecture.md`, and nothing else. It returns a result line and a
 list of findings, each marked as blocking or minor, against four questions:
-are the acceptance criteria met, are modules deep with no leaking interfaces,
-are the tests meaningful, and are there obvious security problems.
+are the acceptance criteria met, are modules deep with no leaking interfaces
+and nothing built beyond the criteria, are the tests meaningful, and are
+there obvious security problems.
 
 `build` hands over the first two as files, `.git/nightshift/review.diff` and
 `.git/nightshift/slice.md`, which it writes with `git diff main...HEAD` and

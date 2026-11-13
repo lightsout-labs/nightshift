@@ -24,6 +24,11 @@ and your recommendation first.
 
 - Ask only what changes what gets built or how it is accepted: users and
   main flows, scope limits, platforms, data, quality bars, deployment.
+- Propose what would make the product better and the human has not
+  mentioned, such as a feature or a more polished UI, as options to accept
+  or decline. This is where ambition is agreed; later stages build exactly
+  what was agreed.
+- Make each quality bar observable: a reference product, or named behaviors.
 - Do not ask what you can decide yourself or what belongs to design.
 - Stop asking when further answers would not change the document.
 
@@ -31,8 +36,9 @@ and your recommendation first.
 
 1. Copy `${CLAUDE_PLUGIN_ROOT}/templates/requirements.md` to
    `docs/requirements.md` and fill in every section. Keep `Status: Draft`.
-   Each requirement is one numbered, testable statement. Record the human's
-   answers under Decisions.
+   Each requirement is one numbered, testable statement. If something
+   seems missing, ask; add nothing the human has not agreed to. Record the
+   human's answers under Decisions.
 2. Create the empty marker file `.nightshift` in the project root. It turns
    the plugin's hooks on for this project.
 

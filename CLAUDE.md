@@ -42,6 +42,11 @@ to run when the document it depends on is not approved.
 - **TDD**: failing tests first, then the code that passes them.
 - **Vertical slices**: every slice is testable end to end. The first slice is a
   walking skeleton that includes CI, e2e, and deployment.
+- **Simplest design**: at every level, the simplest thing that meets the
+  requirements. No requirement the human did not ask for; no component,
+  layer, or dependency the requirements do not need; no code, option, or
+  abstraction for a need that is not stated. This limits scope and
+  structure, never quality: what is built is built well.
 - **Deep modules**: small interfaces hiding substantial behavior. Tests go
   through public interfaces only.
 - **Meaningful tests**: cover all core logic; no coverage chasing, no redundant
