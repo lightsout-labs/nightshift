@@ -78,9 +78,18 @@ These were agreed during planning and refine the requirements above.
   a required CI check.
 - **Retry limit**: during `build`, the agent stops and asks the human after
   three failed attempts to fix the same problem.
+- **Fresh context per slice**: `build` builds one slice per run and then
+  stops. The human clears the context and runs it again. Agent quality drops
+  as context grows, and a visible session cannot clear itself; a headless
+  driver was rejected for now because the human would lose the live view.
+  This is a deliberate pause in addition to the three gates.
+- **Single-agent rule**: the workflow never splits its work across several
+  agents or runs agents in parallel. This does not restrict the subagents that
+  Claude Code starts on its own, for example to search or read code. They keep
+  the main context small, which serves the same goal of saving tokens.
 - **Independent code review**: because the human does not review code, each
-  slice gets one review by a separate agent. This is the only exception to the
-  single-agent rule.
+  slice gets one review by a separate agent. This is the only agent the
+  workflow itself launches.
   - It runs once per slice, after `make check` and `make e2e` pass and before
     the pull request is opened.
   - The reviewer starts from a fresh context and reads only the diff, the
@@ -91,10 +100,12 @@ These were agreed during planning and refine the requirements above.
   - There is a single round. Findings are fixed without a second review, and
     failed fixes count toward the retry limit.
   - The review result is recorded in the pull request description.
-- **Hooks**: the plugin ships three hooks, so these rules are enforced
+- **Hooks**: the plugin ships four hooks, so these rules are enforced
   deterministically rather than by prompt.
   - Gate protection: the agent cannot set a document to `Status: Approved`.
     Only the human approves.
+  - Approval: the human approves by typing `approve` in Claude Code. A hook on
+    the human's prompt changes the status, so the agent cannot trigger it.
   - `main` protection: commits on `main`, direct pushes to it, and force pushes
     are blocked locally.
   - Check before stopping: during `build`, the agent cannot stop while
