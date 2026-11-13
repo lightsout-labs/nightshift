@@ -25,10 +25,9 @@ below is `${CLAUDE_PLUGIN_ROOT}`, `NS` is
      `docs/delivery/vX.Y.Z.md`, an earlier run stopped midway; carry on with
      that version at step 3, skipping what is done. Otherwise tell the human
      there is nothing to release, and stop.
-4. Choose the version. With no `v*` tag it is `v0.1.0`. Otherwise raise the
-   latest tag: the minor number, or the patch number when every slice is a
-   fix, or the major number only when the requirements say that this release
-   breaks compatibility.
+4. Choose the version: `v0.1.0` with no `v*` tag. Otherwise raise the latest
+   tag's minor number, its patch number when every slice is a fix, or its
+   major number only when the requirements say compatibility breaks.
 
 ## 2. Changelog and archive
 
@@ -63,9 +62,8 @@ below is `${CLAUDE_PLUGIN_ROOT}`, `NS` is
      version; say plainly what is missing.
    - **How to try it**: steps you have followed yourself.
    - **Known limits**: also the criteria marked as not yet verified.
-2. Run `make check`. Commit with the message
-   `docs: delivery report vX.Y.Z`, push, and open a pull request with the
-   same title.
+2. Run `make check`. Commit as `docs: delivery report vX.Y.Z`, push, and
+   open a pull request with the same title.
 3. Print the path, a summary of at most five lines, where to try the
    delivery, and: "Try it and read `docs/delivery/vX.Y.Z.md`. Reply with
    changes, or type `approve` to accept the delivery." Stop. You cannot
