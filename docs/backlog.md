@@ -12,7 +12,8 @@ a skill does are marked *(by hand)* and are verified by running the skill on
 
 ## S01: Walking skeleton: requirements gate, end to end
 
-Status: Todo
+Status: Done
+PR: #3
 
 Acceptance criteria:
 - `claude --plugin-dir .` loads the plugin and lists `/nightshift:spec`. The
@@ -35,6 +36,17 @@ Acceptance criteria:
   `main`, and auto-merge is enabled.
 - `README.md` explains what the plugin is, how to install it, and the
   workflow.
+
+Notes:
+- `scripts/nightshift.py` holds the target project contract (marker, gated
+  paths, status line); hooks import it rather than repeat it.
+- Gate protection applies an edit in memory and blocks on the resulting
+  status, so replacing only the word `Draft` is blocked too.
+- Development tools run through `uv`; `plugin.json` has no version until the
+  first release.
+- `spec` already commits and merges after `approve`; starting `design` from
+  there is left to S03.
+- The *(by hand)* criterion is not yet verified; it is when `cellar` starts.
 
 ## S02: Protect `main`
 
