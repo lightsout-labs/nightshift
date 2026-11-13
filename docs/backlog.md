@@ -140,7 +140,8 @@ Notes:
 
 ## S05: Build one slice
 
-Status: In progress
+Status: Done
+PR: #7
 
 Acceptance criteria:
 - `/nightshift:build` refuses to run unless the architecture and the backlog
