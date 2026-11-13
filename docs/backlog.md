@@ -176,7 +176,8 @@ Notes:
 
 ## S06: Check before stopping
 
-Status: In progress
+Status: Done
+PR: #8
 
 Acceptance criteria:
 - While a slice is `In progress`, the stop hook blocks stopping when
