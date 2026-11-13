@@ -5,7 +5,7 @@ requirements and the design, and you accept the delivery. The agent does
 everything else: documents, code, tests, CI, and releases.
 
 > **Status**: under construction. The `spec` and `design` stages, their
-> gates, and `main` protection work today. The other stages are built slice
+> gates, `main` protection, and the document check work today. The other stages are built slice
 > by slice; see [docs/backlog.md](docs/backlog.md).
 
 ## Install
@@ -72,7 +72,7 @@ stay enabled everywhere.
 Requires [uv](https://docs.astral.sh/uv/) and `make`.
 
 ```sh
-make check    # format, lint, unit and structure tests, coverage floor
+make check    # format, lint, document check, unit and structure tests, coverage
 make e2e      # hooks and scripts against a temporary git repository
 make format   # apply formatting and lint fixes
 claude --plugin-dir .    # try the working copy in a session

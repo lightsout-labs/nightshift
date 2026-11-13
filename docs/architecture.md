@@ -151,8 +151,9 @@ slice is already `In progress`, the run resumes it from its `Notes`.
    path, unit tests for core logic.
 3. Write code until `make check` and `make e2e` pass.
 4. Run the `slice-reviewer` agent once and fix its findings.
-5. Update the affected documents, set the slice to `Done`, and open a pull
-   request with the review result in the description. Enable auto-merge.
+5. Update the affected documents and open a pull request with the review
+   result in the description. Set the slice to `Done` with the pull request
+   number, which the document check requires, and enable auto-merge.
 6. Wait for the merge, then stop and tell the human to run `/clear` and
    `/nightshift:build` again. When no slice is left, tell the human to run
    `/nightshift:release` instead.
@@ -209,6 +210,20 @@ fails when:
 - a backlog section is malformed, or more than one slice is `In progress`;
 - a `Done` slice has no pull request number;
 - a relative link in `docs/` points to a file that does not exist.
+
+It takes no arguments, reads `docs/` under the current directory, and prints
+one line per problem, so one run shows everything there is to fix. Documents
+that do not exist yet are not a problem, which lets it run from the first
+slice on. A backlog section is malformed when its heading is not
+`## Snn: title`, its number is used twice, its status line is missing or
+unknown, or it has no acceptance criteria. Links are checked for the file
+only, not for the anchor, and links quoted as code are not read.
+
+Because the copy must run alone, it repeats the status and backlog rules of
+`nightshift.py` instead of importing them. The end-to-end test runs both on
+the same project, so they cannot drift apart unnoticed. `VERSION` in the file
+is a whole number, raised with every change to its behavior, and
+`check-docs.py --version` prints it.
 
 ## Hooks
 
@@ -285,7 +300,7 @@ through `uv`, which installs them from `pyproject.toml` on first use.
 
 No test calls a model, so CI is free and deterministic (see
 [ADR 0004](adr/0004-no-model-calls-in-ci.md)). The coverage floor for
-`hooks/` and `scripts/` is 85%.
+`hooks/`, `scripts/`, and `templates/check-docs.py` is 85%.
 
 ## How this repository uses its own workflow
 

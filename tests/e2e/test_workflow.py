@@ -78,6 +78,15 @@ class Session:
     def gate(self, *documents: str):
         return self.script("gate", *documents)
 
+    def check_docs(self):
+        """Run the document check the way the project's `make check` does."""
+        return subprocess.run(
+            [sys.executable, str(ROOT / "templates" / "check-docs.py")],
+            cwd=self.project,
+            capture_output=True,
+            text=True,
+        )
+
 
 def write_requirements_draft(project: Path) -> Path:
     """What the `spec` skill leaves behind when it stops at the gate."""
@@ -174,6 +183,10 @@ def test_design_gate(repository):
     for path in design:
         assert f"{path} (Draft)" in closed.stderr
 
+    # The drafts are consistent, so the project's `make check` can pass.
+    consistent = session.check_docs()
+    assert consistent.returncode == 0, consistent.stderr
+
     # The agent cannot approve its own design.
     blocked = session.tool(
         "Edit",
@@ -202,6 +215,17 @@ def test_design_gate(repository):
     assert session.script("set-status", "S01", "Done").returncode == 0
     assert session.script("next").stdout.startswith("## S02: ")
     assert session.gate(*design).returncode == 0
+
+    # A finished slice must record its pull request before `make check`
+    # passes again.
+    unrecorded = session.check_docs()
+    assert unrecorded.returncode == 1
+    assert "docs/backlog.md: S01" in unrecorded.stderr
+    backlog = repository / "docs" / "backlog.md"
+    backlog.write_text(
+        backlog.read_text().replace("Status: Done\n", "Status: Done\nPR: #1\n")
+    )
+    assert session.check_docs().returncode == 0
 
 
 def test_hooks_do_nothing_in_a_repository_without_the_marker(repository):

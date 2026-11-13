@@ -4,6 +4,7 @@
 check:
 	uv run ruff format --check .
 	uv run ruff check .
+	uv run python templates/check-docs.py
 	uv run pytest tests --ignore=tests/e2e --cov --cov-fail-under=85
 
 # End-to-end tests: hooks and scripts against a temporary git repository.

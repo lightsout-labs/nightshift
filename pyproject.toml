@@ -22,7 +22,7 @@ select = ["E", "F", "W", "I", "B", "UP", "SIM"]
 testpaths = ["tests"]
 
 [tool.coverage.run]
-source = ["hooks", "scripts"]
+source = ["hooks", "scripts", "templates"]
 # Hooks and scripts are tested through their command lines, in subprocesses.
 patch = ["subprocess"]
 # The test process itself imports none of the measured code.
