@@ -258,3 +258,22 @@ Acceptance criteria:
   *(by hand)*.
 - `make e2e` plays the full project through acceptance: the approval hook
   covers the delivery report, and gate protection covers `docs/delivery/`.
+
+Notes:
+- `nightshift.py archive <version>` does the move, so the skill spends no
+  tokens on it. It refuses when a slice is not `Done`, when there is none,
+  or when the file exists. `next` has a third message, for a backlog with no
+  slices; `build` and `release` then name `/nightshift:spec`.
+- `release` opens two pull requests: `chore/release-vX.Y.Z` (changelog,
+  version, archive) merges itself and is then tagged and deployed;
+  `docs/delivery-vX.Y.Z` holds the draft report and waits at the gate.
+- The first version is `v0.1.0`. A deployment fixed after the tag is tagged
+  as the next patch version; a tag is never moved.
+- The changelog is `CHANGELOG.md` in the project root, written without a
+  template. The report template is `templates/delivery.md`.
+- The hooks and `check-docs.py` needed no change: they already covered
+  `docs/delivery/*.md` and an empty backlog, which the tests now prove.
+- `spec` does not yet say that revising approved requirements for a next
+  release sets them back to `Draft`.
+- The five *(by hand)* criteria are not yet verified; they are when `cellar`
+  reaches its first release.

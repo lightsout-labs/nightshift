@@ -172,7 +172,8 @@ A failed fix is recorded in the slice's `Notes`. After three failed fixes of
 the same problem, the skill stops and asks the human.
 
 When the backlog has no slices at all, which is its state between releases,
-`nightshift.py next` says so, and `build` and `release` have nothing to do.
+`nightshift.py next` says so. `build` and `release` then have nothing to do
+and name `/nightshift:spec`, which starts the next release.
 
 `build` needs a GitHub remote and `gh`, because a `Done` slice must name its
 pull request. In every slice it compares the project's `check-docs.py` with
@@ -227,7 +228,9 @@ something that is already deployed:
    records it, and run `nightshift.py archive`. The pull request merges
    itself when CI is green.
 3. Tag the merged `main` and push the tag, then deploy and verify as the
-   project's architecture document describes.
+   project's architecture document describes. A failed deployment is fixed
+   through a pull request of its own; a tag is never moved, so the fix is
+   tagged and deployed as the next patch version, which the report names.
 4. On the branch `docs/delivery-vX.Y.Z`: write the delivery report from the
    template as a draft, open a pull request, and stop at the acceptance gate.
 5. On `approve`, commit the status, merge, and stop. The release is closed.
@@ -238,8 +241,9 @@ to the report is applied; a change to the product belongs to the next release
 and is recorded under known limits.
 
 The files are the state, so an interrupted run resumes: a `Draft` report
-means the release waits at the gate, and an archived backlog with no report
-of the same version means the run stopped between steps 2 and 4. Like
+on a `docs/delivery-vX.Y.Z` branch means the release waits at the gate, and
+otherwise an archived backlog with no report of the same version means the
+run stopped between steps 2 and 4. Like
 `build`, `release` needs a GitHub remote and `gh`.
 
 ## Scripts

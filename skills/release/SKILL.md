@@ -16,15 +16,15 @@ below is `${CLAUDE_PLUGIN_ROOT}`, `NS` is
 
 1. Run `NS gate docs/architecture.md docs/backlog.md`. If it fails, tell the
    human what it printed, and stop.
-2. If a report in `docs/delivery/` is `Status: Draft`, that release waits for
-   the human: switch to its branch and go to step 4.3.
+2. If a branch `docs/delivery-vX.Y.Z`, local or remote, holds a report that
+   is `Status: Draft`, that release waits: switch to it and go to step 4.3.
 3. Run `NS next`.
    - It prints a slice: tell the human that slice is not done and that
      `/nightshift:build` comes first, and stop.
    - The backlog has no slices: if the newest `docs/backlog/vX.Y.Z.md` has no
      `docs/delivery/vX.Y.Z.md`, an earlier run stopped midway; carry on with
      that version at step 3, skipping what is done. Otherwise tell the human
-     there is nothing to release, and stop.
+     there is nothing to release and `/nightshift:spec` starts the next, and stop.
 4. Choose the version: `v0.1.0` with no `v*` tag. Otherwise raise the latest
    tag's minor number, its patch number when every slice is a fix, or its
    major number only when the requirements say compatibility breaks.
@@ -48,9 +48,9 @@ below is `${CLAUDE_PLUGIN_ROOT}`, `NS` is
 1. Run `git tag vX.Y.Z` and `git push origin vX.Y.Z`.
 2. Deploy as the Deployment section of `docs/architecture.md` describes, and
    verify the result the way it says.
-3. Fix a failed check or deployment through a pull request of its own, and
-   never move a tag. After three failed fixes of the same problem, tell the
-   human the problem and the three attempts, and stop.
+3. Fix a failed deployment through a pull request of its own. Never move a
+   tag: tag and deploy the fix as the next patch version, and name it in the
+   report. After three failed fixes of one problem, ask the human and stop.
 
 ## 4. Delivery report
 

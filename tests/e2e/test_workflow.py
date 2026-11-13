@@ -364,6 +364,7 @@ def test_acceptance_gate(repository):
     git(repository, "add", "--all")
     git(repository, "commit", "--quiet", "-m", f"chore: release {version}")
     git(repository, "switch", "--quiet", "-c", "main")
+    assert session.tool("Bash", command="git commit -am x").returncode == BLOCKED
     tagging = session.tool(
         "Bash", command=f"git tag {version} && git push origin {version}"
     )
