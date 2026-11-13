@@ -41,6 +41,22 @@ def write_doc(project: Path, relative: str, status: str | None) -> Path:
     return path
 
 
+def git(directory: Path, *args: str) -> str:
+    """Run a git command in `directory` and return its output."""
+    return subprocess.run(
+        ["git", *args], cwd=directory, check=True, capture_output=True, text=True
+    ).stdout
+
+
+@pytest.fixture
+def repository(tmp_path: Path) -> Path:
+    """An empty git repository on `main`."""
+    git(tmp_path, "init", "--quiet", "--initial-branch=main")
+    git(tmp_path, "config", "user.name", "test")
+    git(tmp_path, "config", "user.email", "test@example.invalid")
+    return tmp_path
+
+
 @pytest.fixture
 def project(tmp_path: Path) -> Path:
     """A target project that has adopted the workflow."""
