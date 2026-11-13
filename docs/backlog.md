@@ -112,7 +112,8 @@ Notes:
 
 ## S04: Document sync check
 
-Status: In progress
+Status: Done
+PR: #6
 
 Acceptance criteria:
 - `check-docs.py` fails, naming the file and the reason, when a gated
