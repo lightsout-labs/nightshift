@@ -4,8 +4,8 @@ A Claude Code plugin that runs a solo "software factory". You review the
 requirements and the design, and you accept the delivery. The agent does
 everything else: documents, code, tests, CI, and releases.
 
-> **Status**: under construction. The `spec` stage and the requirements gate
-> work today. The other stages are built slice by slice; see
+> **Status**: under construction. The `spec` stage, the requirements gate,
+> and `main` protection work today. The other stages are built slice by slice; see
 > [docs/backlog.md](docs/backlog.md).
 
 ## Install
@@ -47,6 +47,11 @@ You then either:
 The agent cannot approve its own work. Approval happens in a hook that runs
 only on what you type, and a second hook blocks the agent from writing an
 approved status or starting a nested `claude` session to type it for you.
+
+A third hook keeps the agent off `main`: it blocks a commit while on `main`,
+a push to `main`, and any force push, so every change arrives as a pull
+request. Keep branch protection enabled on the server as well; the hook stops
+mistakes, not a determined bypass.
 
 A project opts in through an empty `.nightshift` file in its root, which
 `/nightshift:spec` creates. Without it the hooks do nothing, so the plugin can

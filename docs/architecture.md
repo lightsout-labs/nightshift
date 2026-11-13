@@ -235,6 +235,14 @@ Details:
   quoting the status in a document body is not.
 - Gate protection also blocks shell commands that start a nested `claude`
   session, since a prompt submitted there would count as human input.
+- `main` protection judges each git command by the branch it would run on,
+  following `cd`, `git -C`, and `git switch` or `git checkout` earlier in the
+  same command line. `git switch -c feat/x && git commit` is therefore allowed
+  on `main`. A commit on a detached `HEAD` is allowed.
+- A push is to `main` when a refspec's destination is `main`, when it has no
+  refspec and the current branch is `main`, or when it pushes every branch
+  (`--all`, `--mirror`). Pushing tags is allowed from any branch. A force push
+  is any `--force...` option, `-f`, or a `+` refspec.
 - The stop hook keeps a count of consecutive failures in `.git/nightshift/`,
   which is never committed. On the third failure it lets the agent stop and
   tells it to ask the human. A passing run resets the count.

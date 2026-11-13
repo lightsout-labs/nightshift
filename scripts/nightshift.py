@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 
 MARKER = ".nightshift"
+MAIN = "main"
 GATED = (
     "docs/requirements.md",
     "docs/architecture.md",

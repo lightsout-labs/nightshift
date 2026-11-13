@@ -13,7 +13,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
+from conftest import git
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 BLOCKED = 2
@@ -78,20 +78,6 @@ class Session:
             capture_output=True,
             text=True,
         )
-
-
-def git(project: Path, *args: str) -> str:
-    return subprocess.run(
-        ["git", *args], cwd=project, check=True, capture_output=True, text=True
-    ).stdout
-
-
-@pytest.fixture
-def repository(tmp_path: Path) -> Path:
-    git(tmp_path, "init", "--quiet", "--initial-branch=main")
-    git(tmp_path, "config", "user.name", "e2e")
-    git(tmp_path, "config", "user.email", "e2e@example.invalid")
-    return tmp_path
 
 
 def write_requirements_draft(project: Path) -> Path:
@@ -174,3 +160,39 @@ def test_hooks_do_nothing_in_a_repository_without_the_marker(repository):
     assert prompt.returncode == 0
     assert prompt.stdout == ""
     assert "Status: Draft" in document.read_text()
+
+
+def test_main_protection(repository):
+    session = Session(repository)
+    write_requirements_draft(repository)
+    git(repository, "switch", "--quiet", "-c", "main")
+
+    def shell(command: str):
+        return session.tool("Bash", command=command)
+
+    # On `main`, the agent can neither commit nor push.
+    for command in ("git commit -am 'feat: a change'", "git push"):
+        blocked = shell(command)
+        assert blocked.returncode == BLOCKED
+        assert "main" in blocked.stderr
+
+    # Starting a branch and committing on it in one command is the way out.
+    assert shell("git switch -c feat/a && git commit -am x").returncode == 0
+
+    # On a branch, commits and pushes of that branch are allowed.
+    git(repository, "switch", "--quiet", "-c", "feat/a")
+    for command in ("git commit -am 'feat: a change'", "git push -u origin feat/a"):
+        assert shell(command).returncode == 0
+
+    # From a branch, `main` still cannot be pushed to, and nothing is forced.
+    for command in ("git push origin feat/a:main", "git push --force origin feat/a"):
+        blocked = shell(command)
+        assert blocked.returncode == BLOCKED
+        assert blocked.stderr
+
+
+def test_main_protection_does_nothing_without_the_marker(repository):
+    session = Session(repository)
+
+    for command in ("git commit -m x", "git push --force origin main"):
+        assert session.tool("Bash", command=command).returncode == 0

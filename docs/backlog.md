@@ -50,7 +50,8 @@ Notes:
 
 ## S02: Protect `main`
 
-Status: Todo
+Status: Done
+PR: #4
 
 Acceptance criteria:
 - The hook blocks `git commit` while on `main`, `git push` to `main`, and any
@@ -58,6 +59,18 @@ Acceptance criteria:
 - It allows commits and pushes on other branches, and does nothing without
   `.nightshift`.
 - `make e2e` covers each blocked and allowed case in a temporary repository.
+
+Notes:
+- `hooks/main_protection.py` is a second `PreToolUse` registration, for
+  `Bash` only. The branch name is `nightshift.MAIN`.
+- The hook follows `cd`, `git -C`, and `git switch`/`git checkout` within one
+  command line, so branching and committing in one command works on `main`.
+  A switch to a branch that does not exist locally is not followed.
+- Commands are split with `shlex`, so quoted text such as a commit message is
+  never read as a command. Unbalanced quotes fall back to a plain split.
+- Only `commit` and `push` are checked; `merge`, `cherry-pick`, and `revert`
+  on `main` are left to server-side protection.
+- Pushing tags from `main` is allowed, because `release` tags there.
 
 ## S03: Design gate: architecture, ADRs, and backlog
 
