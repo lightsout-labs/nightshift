@@ -66,18 +66,17 @@ class Session:
     def human_says(self, prompt: str):
         return self._fire("UserPromptSubmit", None, {"prompt": prompt})
 
-    def gate(self, *documents: str):
+    def script(self, *arguments: str):
+        """Run `nightshift.py` the way a skill does, from the project root."""
         return subprocess.run(
-            [
-                sys.executable,
-                str(ROOT / "scripts" / "nightshift.py"),
-                "gate",
-                *documents,
-            ],
+            [sys.executable, str(ROOT / "scripts" / "nightshift.py"), *arguments],
             cwd=self.project,
             capture_output=True,
             text=True,
         )
+
+    def gate(self, *documents: str):
+        return self.script("gate", *documents)
 
 
 def write_requirements_draft(project: Path) -> Path:
@@ -91,6 +90,23 @@ def write_requirements_draft(project: Path) -> Path:
     git(project, "add", "--all")
     git(project, "commit", "--quiet", "-m", "docs: draft requirements")
     return requirements
+
+
+def write_design_draft(project: Path) -> list[str]:
+    """What the `design` skill leaves behind when it stops at the gate."""
+    copies = {
+        "architecture.md": "docs/architecture.md",
+        "adr.md": "docs/adr/0001-first-decision.md",
+        "backlog.md": "docs/backlog.md",
+    }
+    for template, relative in copies.items():
+        target = project / relative
+        target.parent.mkdir(exist_ok=True)
+        target.write_text((ROOT / "templates" / template).read_text())
+    git(project, "switch", "--quiet", "-c", "docs/design")
+    git(project, "add", "--all")
+    git(project, "commit", "--quiet", "-m", "docs: draft design")
+    return ["docs/architecture.md", "docs/backlog.md"]
 
 
 def test_requirements_gate(repository):
@@ -138,6 +154,54 @@ def test_requirements_gate(repository):
     assert path in approval.stdout
     assert session.gate(path).returncode == 0
     assert git(repository, "status", "--porcelain").split() == ["M", path]
+
+
+def test_design_gate(repository):
+    session = Session(repository)
+    write_requirements_draft(repository)
+    requirements = "docs/requirements.md"
+
+    # `design` refuses to start before the requirements are approved.
+    assert session.gate(requirements).returncode == 1
+    session.human_says("approve")
+    git(repository, "commit", "--quiet", "-am", "docs: approve requirements")
+    assert session.gate(requirements).returncode == 0
+
+    # The design is drafted from the templates: `build` cannot start yet.
+    design = write_design_draft(repository)
+    closed = session.gate(*design)
+    assert closed.returncode == 1
+    for path in design:
+        assert f"{path} (Draft)" in closed.stderr
+
+    # The agent cannot approve its own design.
+    blocked = session.tool(
+        "Edit",
+        file_path=str(repository / "docs" / "backlog.md"),
+        old_string="Status: Draft",
+        new_string="Status: Approved",
+    )
+    assert blocked.returncode == BLOCKED
+    assert session.gate(*design).returncode == 1
+
+    # One word from the human approves the architecture and the backlog
+    # together, and leaves the ADR and the slice statuses alone.
+    approval = session.human_says("approve")
+    for path in design:
+        assert path in approval.stdout
+    assert session.gate(*design).returncode == 0
+    assert sorted(git(repository, "status", "--porcelain").split()) == sorted(
+        ["M", "M", *design]
+    )
+
+    # The approved backlog is ready for `build`: the walking skeleton is
+    # next, and only one slice at a time can be in progress.
+    assert session.script("next").stdout.startswith("## S01: Walking skeleton")
+    assert session.script("set-status", "S01", "In progress").returncode == 0
+    assert session.script("set-status", "S02", "In progress").returncode == 1
+    assert session.script("set-status", "S01", "Done").returncode == 0
+    assert session.script("next").stdout.startswith("## S02: ")
+    assert session.gate(*design).returncode == 0
 
 
 def test_hooks_do_nothing_in_a_repository_without_the_marker(repository):
