@@ -12,3 +12,10 @@ Slice: S<nn> <title>
 
 - `make check`: <passed>
 - `make e2e`: <passed>
+
+## Review
+
+<The reviewer's result line, or "Passed with no findings.">
+
+- <Each finding as reported, blocking or minor, then: fixed in <commit>, or
+  why it was not changed.>

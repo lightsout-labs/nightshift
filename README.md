@@ -5,8 +5,8 @@ requirements and the design, and you accept the delivery. The agent does
 everything else: documents, code, tests, CI, and releases.
 
 > **Status**: under construction. The `spec`, `design`, and `build` stages,
-> the gates, `main` protection, and the document check work today. The slice
-> review and `release` are built slice by slice; see
+> the gates, `main` protection, the document check, and the slice review work
+> today. `release` is the slice still to build; see
 > [docs/backlog.md](docs/backlog.md).
 
 ## Install
@@ -31,7 +31,7 @@ nowhere else.
 |---|---|---|---|
 | Spec | `/nightshift:spec` | `docs/requirements.md`, after asking you clarifying questions | Approve |
 | Design | `/nightshift:design` | `docs/architecture.md`, ADRs, and a backlog of vertical slices | Approve |
-| Build | `/nightshift:build` | One slice per run: tests first, then code, then a pull request that merges itself when CI is green | Run `/clear` and the command again |
+| Build | `/nightshift:build` | One slice per run: tests first, then code, one review by a separate read-only agent, then a pull request that merges itself when CI is green | Run `/clear` and the command again |
 | Release | `/nightshift:release` | A tagged version, a changelog, a deployment, and a delivery report | Accept |
 
 Every command but `/nightshift:release` exists so far. After you approve

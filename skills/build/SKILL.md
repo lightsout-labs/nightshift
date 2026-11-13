@@ -7,9 +7,10 @@ disable-model-invocation: true
 # build: build one slice
 
 Build the first slice of `docs/backlog.md` that is not `Done`, then stop.
-Write everything in English. Do the work yourself; do not launch agents. `NS`
-below is `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/nightshift.py"`, run from the
-project root. `Snn` is the slice's number.
+Write everything in English. Do the work yourself; the only agent you launch
+is the reviewer in step 4. `PLUGIN` below is `${CLAUDE_PLUGIN_ROOT}`, `NS` is
+`python3 "PLUGIN/scripts/nightshift.py"` run from the project root, and `Snn`
+is the slice's number.
 
 ## 1. Find the slice
 
@@ -40,41 +41,40 @@ Write code until `make check` and `make e2e` pass.
 - Deep modules: few operations in each interface, substantial behavior
   behind it. Follow the architecture document; if it is wrong, change it in
   this slice. A decision that is costly to reverse gets an ADR from
-  `${CLAUDE_PLUGIN_ROOT}/templates/adr.md`.
-- Never weaken a test, lower the coverage floor, or switch off a lint rule to
-  make a check pass.
+  `PLUGIN/templates/adr.md`.
+- Never weaken a test, the coverage floor, or a lint rule to pass a check.
 - If a criterion is ambiguous in a way that changes behavior, ask the human
   with AskUserQuestion. Decide everything else yourself.
 - When a fix fails, add a line to the slice's `Notes`: the problem and what
   you tried. After three failed fixes of the same problem, commit, push,
   tell the human the problem and the three attempts, and stop.
 - If `python3 scripts/check-docs.py --version` prints a lower number than
-  `${CLAUDE_PLUGIN_ROOT}/templates/check-docs.py --version`, copy it again.
+  `PLUGIN/templates/check-docs.py --version`, copy it again.
+- A walking skeleton slice also delivers what
+  `PLUGIN/skills/build/walking-skeleton.md` lists. Read it for that slice only.
 
-**A walking skeleton slice** also delivers:
-- `Makefile`: `check` runs the format check, lint, unit tests with the
-  coverage floor, and `python3 scripts/check-docs.py`; `e2e` runs the
-  end-to-end tests.
-- `scripts/check-docs.py`, copied unchanged from
-  `${CLAUDE_PLUGIN_ROOT}/templates/check-docs.py`.
-- `CLAUDE.md`, from `${CLAUDE_PLUGIN_ROOT}/templates/CLAUDE.md`, filled in.
-- CI that runs on every pull request, with two jobs named exactly `check`
-  and `e2e`, and deployment as the architecture document describes.
-- With `gh`, after the first push: squash merging only, auto-merge, branch
-  deletion on merge, and protection of `main` that requires `check` and
-  `e2e`, for administrators too.
+## 4. Review
 
-## 4. Deliver
+Once per slice. If `.git/nightshift/review-Snn.md` exists, go to 3.
 
-1. Update every document the slice affects: architecture, README, ADRs. Add
-   to the slice's `Notes` the decisions a later slice needs to know.
-2. Commit, push, and open a pull request titled `<type>: <summary> (Snn)`,
-   with the body from `${CLAUDE_PLUGIN_ROOT}/templates/pull-request.md`.
-3. Run `NS set-status Snn done` and add `PR: #<number>` on the line after
-   the status. Run `make check`, commit, push, and run
-   `gh pr merge --squash --auto`.
-4. Run `gh pr checks --watch`. A failing check is a problem to fix as in
+1. Update every document the slice affects: architecture, README, ADRs. Run
+   `make check` and commit. Run `mkdir -p .git/nightshift`, then
+   `git diff main...HEAD > .git/nightshift/review.diff` and
+   `NS next > .git/nightshift/slice.md`.
+2. Launch the `nightshift:slice-reviewer` agent with the prompt "Review the
+   slice." and no word more. Save its reply as `.git/nightshift/review-Snn.md`.
+3. Fix every blocking finding in that file, and each minor one that is
+   right, as in step 3. Do not review again.
+
+## 5. Deliver
+
+1. Add to the slice's `Notes` the decisions a later slice needs to know.
+   Commit, push, and open a pull request titled `<type>: <summary> (Snn)`,
+   with the body from `PLUGIN/templates/pull-request.md`.
+2. Run `NS set-status Snn done`, add `PR: #<number>` on the line after the
+   status, run `make check`, commit, push, and `gh pr merge --squash --auto`.
+3. Run `gh pr checks --watch`. A failing check is a problem to fix as in
    step 3. When the pull request has merged, switch to the updated `main`.
-5. Tell the human what was built in at most five lines, and: "Run `/clear`,
+4. Tell the human what was built in at most five lines, and: "Run `/clear`,
    then `/nightshift:build`." If `NS next` reports that no slice is left,
    name `/nightshift:release` instead. Stop.
