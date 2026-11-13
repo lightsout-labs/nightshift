@@ -59,6 +59,10 @@ a push to `main`, and any force push, so every change arrives as a pull
 request. Keep branch protection enabled on the server as well; the hook stops
 mistakes, not a determined bypass.
 
+A fourth hook runs `make check` whenever the agent tries to stop in the
+middle of a slice, and sends it back to work when the check fails. After
+three failures in a row it lets the agent stop to ask you instead.
+
 A project opts in through an empty `.nightshift` file in its root, which
 `/nightshift:spec` creates. Without it the hooks do nothing, so the plugin can
 stay enabled everywhere.

@@ -66,6 +66,10 @@ class Session:
     def human_says(self, prompt: str):
         return self._fire("UserPromptSubmit", None, {"prompt": prompt})
 
+    def stops(self):
+        """The agent finishes its turn."""
+        return self._fire("Stop", None, {"stop_hook_active": False})
+
     def script(self, *arguments: str):
         """Run `nightshift.py` the way a skill does, from the project root."""
         return subprocess.run(
@@ -284,3 +288,39 @@ def test_main_protection_does_nothing_without_the_marker(repository):
 
     for command in ("git commit -m x", "git push --force origin main"):
         assert session.tool("Bash", command=command).returncode == 0
+
+
+def test_check_before_stopping(repository):
+    session = Session(repository)
+    write_requirements_draft(repository)
+    session.human_says("approve")
+    write_design_draft(repository)
+    session.human_says("approve")
+    # The project's `make check`: the document check and one project rule.
+    (repository / "Makefile").write_text(
+        "check:\n"
+        f'\t@"{sys.executable}" "{ROOT / "templates" / "check-docs.py"}"\n'
+        "\t@test ! -f failing-test || (echo 'test_cell failed'; exit 1)\n"
+    )
+    git(repository, "add", "--all")
+    git(repository, "commit", "--quiet", "-m", "docs: approve design")
+    failing_test = repository / "failing-test"
+
+    # Between slices, the agent stops freely, whatever the state of the code.
+    failing_test.touch()
+    assert session.stops().returncode == 0
+
+    # While a slice is being built, it cannot stop on a failing check.
+    session.script("set-status", "S01", "in-progress")
+    blocked = session.stops()
+    assert blocked.returncode == BLOCKED
+    assert "test_cell failed" in blocked.stderr
+
+    # The document check is part of it: a finished slice with no pull request
+    # number would fail, but by then no slice is in progress.
+    failing_test.unlink()
+    assert session.stops().returncode == 0
+
+    # None of this shows up in the project's working tree.
+    status = git(repository, "status", "--porcelain").split()
+    assert status == ["M", "docs/backlog.md"]

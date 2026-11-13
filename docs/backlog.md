@@ -176,7 +176,8 @@ Notes:
 
 ## S06: Check before stopping
 
-Status: Todo
+Status: Done
+PR: #8
 
 Acceptance criteria:
 - While a slice is `In progress`, the stop hook blocks stopping when
@@ -186,6 +187,20 @@ Acceptance criteria:
 - It does not run `make check` when no slice is `In progress`, or when the
   working tree is unchanged since the last passing run.
 - Its state is under `.git/nightshift/` and never appears in `git status`.
+
+Notes:
+- `hooks/check_before_stopping.py` is registered for `Stop` with the default
+  timeout of 600 seconds; a `make check` that runs longer is not enforced.
+- The third failure does not block. Claude Code gives a Stop hook's text to
+  the agent only by continuing the turn, so the hook returns the output as
+  `additionalContext` telling the agent to ask the human, and the stop after
+  that passes without a run. The count then starts again from zero.
+- "Unchanged" compares a tree hash of every file git does not ignore, taken
+  through the hook's own index in `.git/nightshift/`, so uncommitted and
+  untracked files count and the project's index is untouched.
+- The hook does nothing outside a git repository or when the backlog cannot
+  be read. Once `build` sets the slice to `Done`, the hook no longer runs.
+- The `build` skill was not changed: the hook's messages say what to do.
 
 ## S07: Independent slice review
 
