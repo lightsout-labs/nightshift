@@ -16,8 +16,8 @@ is the slice's number.
 
 1. Run `NS gate docs/architecture.md docs/backlog.md`. If it fails, tell the
    human what it printed and that `/nightshift:design` comes first, and stop.
-2. Run `NS next`. If no slice is left, tell the human: "Every slice is done.
-   Run `/clear`, then `/nightshift:release`." Stop.
+2. Run `NS next`. If every slice is done, tell the human to run `/clear`,
+   then `/nightshift:release`; if the backlog has none, `/nightshift:spec`. Stop.
 3. Read `docs/architecture.md`, and only the code the slice touches.
 4. `Status: Todo`: create the branch `feat/<short-kebab-title>` from the
    latest `main` and run `NS set-status Snn in-progress`.

@@ -27,6 +27,7 @@ DRAFT = "Draft"
 APPROVED = "Approved"
 
 BACKLOG = "docs/backlog.md"
+ARCHIVE = "docs/backlog"
 TODO = "Todo"
 IN_PROGRESS = "In progress"
 DONE = "Done"
@@ -35,6 +36,7 @@ SLICE_STATUSES = (TODO, IN_PROGRESS, DONE)
 _STATUS_LINE = re.compile(rf"Status: ({DRAFT}|{APPROVED})")
 _SLICE_HEADING = re.compile(r"## (S\d+): .+")
 _SLICE_STATUS_LINE = re.compile(rf"Status: ({'|'.join(SLICE_STATUSES)})")
+_VERSION = re.compile(r"v\d+\.\d+\.\d+")
 
 
 def find_project(start: str | Path) -> Path | None:
@@ -136,11 +138,15 @@ def _read_backlog() -> list[str]:
 
 def _next() -> int:
     lines = [line.rstrip("\r\n") for line in _read_backlog()]
-    for item in backlog_slices(lines):
+    slices = backlog_slices(lines)
+    for item in slices:
         if item.status != DONE:
             print("\n".join(lines[item.start : item.end]).rstrip())
             return 0
-    print("No slice is left: every slice is Done.")
+    if slices:
+        print("No slice is left: every slice is Done.")
+    else:
+        print("The backlog has no slices: nothing is planned or left to release.")
     return 0
 
 
@@ -159,6 +165,36 @@ def _set_status(slice_id: str, status: str) -> int:
     lines[target.status_index] = f"Status: {status}" + old[len(old.rstrip("\r\n")) :]
     Path(BACKLOG).write_text("".join(lines))
     return 0
+
+
+def _archive(version: str) -> int:
+    """Move the slices of a finished release out of the backlog."""
+    lines = _read_backlog()
+    slices = backlog_slices([line.rstrip("\r\n") for line in lines])
+    if not slices:
+        raise BacklogError("has no slices to archive")
+    open_slices = [item.id for item in slices if item.status != DONE]
+    if open_slices:
+        raise BacklogError(f"not Done: {', '.join(open_slices)}")
+    archive = Path(ARCHIVE) / f"{version}.md"
+    if archive.exists():
+        raise BacklogError(f"{archive.as_posix()} already exists")
+    first = slices[0].start
+    archive.parent.mkdir(exist_ok=True)
+    archive.write_text(
+        f"# Backlog of {version}\n\n"
+        f"The slices delivered in {version}, moved here from"
+        " [backlog.md](../backlog.md).\n\n" + "".join(lines[first:])
+    )
+    Path(BACKLOG).write_text("".join(lines[:first]).rstrip() + "\n")
+    print(f"Moved {len(slices)} slices to {archive.as_posix()}")
+    return 0
+
+
+def _version(text: str) -> str:
+    if not _VERSION.fullmatch(text):
+        raise argparse.ArgumentTypeError(f"{text!r} is not vMAJOR.MINOR.PATCH")
+    return text
 
 
 def _slice_status(text: str) -> str:
@@ -203,12 +239,18 @@ def main(argv: list[str] | None = None) -> int:
     set_status.add_argument(
         "status", type=_slice_status, help=" | ".join(SLICE_STATUSES)
     )
+    archive = commands.add_parser(
+        "archive", help="move the slices, all Done, to docs/backlog/<version>.md"
+    )
+    archive.add_argument("version", type=_version, help="such as v1.2.0")
     args = parser.parse_args(argv)
     try:
         if args.command == "gate":
             return _gate(args.documents)
         if args.command == "next":
             return _next()
+        if args.command == "archive":
+            return _archive(args.version)
         return _set_status(args.slice, args.status)
     except BacklogError as error:
         print(f"{BACKLOG}: {error}", file=sys.stderr)

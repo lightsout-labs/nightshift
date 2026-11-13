@@ -324,3 +324,83 @@ def test_check_before_stopping(repository):
     # None of this shows up in the project's working tree.
     status = git(repository, "status", "--porcelain").split()
     assert status == ["M", "docs/backlog.md"]
+
+
+def test_acceptance_gate(repository):
+    session = Session(repository)
+    write_requirements_draft(repository)
+    session.human_says("approve")
+    write_design_draft(repository)
+    session.human_says("approve")
+    git(repository, "add", "--all")
+    git(repository, "commit", "--quiet", "-m", "docs: approve design")
+    version = "v0.1.0"
+    backlog = repository / "docs" / "backlog.md"
+
+    # `release` refuses while a slice is not done, and archives nothing.
+    session.script("set-status", "S01", "done")
+    refused = session.script("archive", version)
+    assert refused.returncode == 1
+    assert "S02" in refused.stderr
+    assert "## S01" in backlog.read_text()
+
+    # Every slice is built: the release moves them out of the backlog, which
+    # stays approved and consistent with no slices in it.
+    session.script("set-status", "S02", "done")
+    backlog.write_text(
+        backlog.read_text().replace("Status: Done\n", "Status: Done\nPR: #1\n")
+    )
+    assert "No slice is left" in session.script("next").stdout
+    assert session.script("archive", version).returncode == 0
+    archive = repository / "docs" / "backlog" / f"{version}.md"
+    assert "## S01" in archive.read_text()
+    assert "## S02" in archive.read_text()
+    assert "## S" not in backlog.read_text()
+    assert "has no slices" in session.script("next").stdout
+    assert session.gate("docs/architecture.md", "docs/backlog.md").returncode == 0
+    assert session.check_docs().returncode == 0
+
+    # The version is tagged on `main`, where the agent still cannot commit.
+    git(repository, "add", "--all")
+    git(repository, "commit", "--quiet", "-m", f"chore: release {version}")
+    git(repository, "switch", "--quiet", "-c", "main")
+    assert session.tool("Bash", command="git commit -am x").returncode == BLOCKED
+    tagging = session.tool(
+        "Bash", command=f"git tag {version} && git push origin {version}"
+    )
+    assert tagging.returncode == 0
+
+    # The delivery report is drafted from the template: not accepted yet.
+    git(repository, "switch", "--quiet", "-c", f"docs/delivery-{version}")
+    path = f"docs/delivery/{version}.md"
+    report = repository / path
+    report.parent.mkdir()
+    template = (ROOT / "templates" / "delivery.md").read_text()
+    report.write_text(template.replace("vX.Y.Z", version))
+    git(repository, "add", "--all")
+    git(repository, "commit", "--quiet", "-m", f"docs: delivery report {version}")
+    closed = session.gate(path)
+    assert closed.returncode == 1
+    assert f"{path} (Draft)" in closed.stderr
+    consistent = session.check_docs()
+    assert consistent.returncode == 0, consistent.stderr
+
+    # The agent cannot accept its own delivery.
+    by_edit = session.tool(
+        "Edit",
+        file_path=str(report),
+        old_string="Status: Draft",
+        new_string="Status: Approved",
+    )
+    by_shell = session.tool(
+        "Bash", command=f"sed -i 's/Status: Draft/Status: Approved/' {path}"
+    )
+    for attempt in (by_edit, by_shell):
+        assert attempt.returncode == BLOCKED
+    assert session.gate(path).returncode == 1
+
+    # One word from the human accepts it, and changes nothing else.
+    acceptance = session.human_says("approve")
+    assert path in acceptance.stdout
+    assert session.gate(path).returncode == 0
+    assert git(repository, "status", "--porcelain").split() == ["M", path]

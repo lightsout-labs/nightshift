@@ -4,10 +4,9 @@ A Claude Code plugin that runs a solo "software factory". You review the
 requirements and the design, and you accept the delivery. The agent does
 everything else: documents, code, tests, CI, and releases.
 
-> **Status**: under construction. The `spec`, `design`, and `build` stages,
-> the gates, `main` protection, the document check, and the slice review work
-> today. `release` is the slice still to build; see
-> [docs/backlog.md](docs/backlog.md).
+> **Status**: every stage exists, and the plugin has not been released yet.
+> What the skills do is being verified by building `lightsout-labs/cellar`;
+> see [docs/backlog.md](docs/backlog.md).
 
 ## Install
 
@@ -34,11 +33,16 @@ nowhere else.
 | Build | `/nightshift:build` | One slice per run: tests first, then code, one review by a separate read-only agent, then a pull request that merges itself when CI is green | Run `/clear` and the command again |
 | Release | `/nightshift:release` | A tagged version, a changelog, a deployment, and a delivery report | Accept |
 
-Every command but `/nightshift:release` exists so far. After you approve
-the requirements, design starts in the same session. `/nightshift:build`
-builds one slice and stops, so that each slice starts from a clean context;
-it resumes a slice that was interrupted. `/nightshift:slice` rewrites the backlog alone, for
-when the plan changes after the design is approved.
+After you approve the requirements, design starts in the same session.
+`/nightshift:build` builds one slice and stops, so that each slice starts
+from a clean context; it resumes a slice that was interrupted.
+`/nightshift:slice` rewrites the backlog alone, for when the plan changes
+after the design is approved.
+
+`/nightshift:release` runs when every slice is done. It tags and deploys the
+version, moves the finished slices to `docs/backlog/vX.Y.Z.md`, and writes
+`docs/delivery/vX.Y.Z.md`: what was delivered against each requirement, how
+to try it, and known limits. Typing `approve` there accepts the delivery.
 
 ### Gates
 
