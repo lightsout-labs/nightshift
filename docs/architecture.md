@@ -386,7 +386,7 @@ through `uv`, which installs them from `pyproject.toml` on first use.
 | Unit | Backlog and status parsing, each `check-docs` rule, each hook's decision | `pytest`, through each script's command-line interface |
 | Structure | Manifests are valid, every skill has frontmatter and stays under a line budget, every plugin file that a skill names exists, the settings template names this marketplace and plugin, the reviewer is the only agent, has no tool but `Read`, and is named only by `build` | `pytest` |
 | End to end (`make e2e`) | Hooks and scripts against a temporary git repository that plays a target project through all stages | `pytest`, with hook input fed as Claude Code sends it |
-| Skills | Whether the prompts produce the intended behavior | Building `cellar`; problems found there become slices here |
+| Skills | Whether the prompts produce the intended behavior | Building `gridworks`; problems found there become slices here |
 
 No test calls a model, so CI is free and deterministic (see
 [ADR 0004](adr/0004-no-model-calls-in-ci.md)). The coverage floor for
@@ -415,5 +415,5 @@ short:
 7. The slice reviewer.
 8. `release`.
 
-`cellar` is created after slice 1 and follows one stage behind, so each skill
+`gridworks` is created after slice 1 and follows one stage behind, so each skill
 is tried on a real project as soon as it exists.
