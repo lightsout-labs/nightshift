@@ -5,7 +5,7 @@ requirements and the design, and you accept the delivery. The agent does
 everything else: documents, code, tests, CI, and releases.
 
 > **Status**: every stage exists, and the plugin has not been released yet.
-> What the skills do is being verified by building `lightsout-labs/cellar`;
+> What the skills do is being verified by building `lightsout-labs/gridworks`;
 > see [docs/backlog.md](docs/backlog.md).
 
 ## Install
@@ -97,7 +97,7 @@ claude --plugin-dir .    # try the working copy in a session
 ```
 
 No test calls a model. What the skills do is checked by building the example
-project, `lightsout-labs/cellar`. Branching and commit rules are in
+project, `lightsout-labs/gridworks`. Branching and commit rules are in
 [docs/branching.md](docs/branching.md).
 
 ## License

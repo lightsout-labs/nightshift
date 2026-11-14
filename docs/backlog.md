@@ -8,7 +8,7 @@ in [architecture.md](architecture.md#backlog-format).
 Two kinds of acceptance criteria appear below. Those about hooks, scripts, and
 plugin structure are verified by `make check` and `make e2e`. Those about what
 a skill does are marked *(by hand)* and are verified by running the skill on
-`cellar`, because no test calls a model.
+`gridworks`, because no test calls a model.
 
 ## S01: Walking skeleton: requirements gate, end to end
 
@@ -46,7 +46,7 @@ Notes:
   first release.
 - `spec` already commits and merges after `approve`; starting `design` from
   there is left to S03.
-- The *(by hand)* criterion is not yet verified; it is when `cellar` starts.
+- The *(by hand)* criterion is not yet verified; it is when `gridworks` starts.
 
 ## S02: Protect `main`
 
@@ -107,7 +107,7 @@ Notes:
   scripts cannot parse fails the build.
 - Without a remote, the skills fast-forward `main` after approval, since the
   `main` protection hook blocks a commit there.
-- The four *(by hand)* criteria are not yet verified; they are when `cellar`
+- The four *(by hand)* criteria are not yet verified; they are when `gridworks`
   reaches its design stage.
 
 ## S04: Document sync check
@@ -171,7 +171,7 @@ Notes:
 - The pull request is opened first, then the slice is set to `Done` with its
   number in a second commit, so `make check` passes on the merged commit.
 - A failing CI check counts as a failed fix toward the limit of three.
-- The six *(by hand)* criteria are not yet verified; they are when `cellar`
+- The six *(by hand)* criteria are not yet verified; they are when `gridworks`
   builds its first slices.
 
 ## S06: Check before stopping
@@ -234,7 +234,7 @@ Notes:
   given the definition's text reviewed the diff from the three files alone
   and reported 2 blocking and 3 minor findings, all fixed in one round and
   listed in the pull request. A run of `build` with the plugin's own agent
-  type is not yet verified; it is when `cellar` builds its next slice.
+  type is not yet verified; it is when `gridworks` builds its next slice.
 
 ## S08: Release and acceptance
 
@@ -276,5 +276,5 @@ Notes:
   `docs/delivery/*.md` and an empty backlog, which the tests now prove.
 - `spec` does not yet say that revising approved requirements for a next
   release sets them back to `Draft`.
-- The five *(by hand)* criteria are not yet verified; they are when `cellar`
+- The five *(by hand)* criteria are not yet verified; they are when `gridworks`
   reaches its first release.

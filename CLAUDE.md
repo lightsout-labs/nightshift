@@ -11,7 +11,7 @@ choices.
 - A Claude Code plugin, and its own plugin marketplace.
 - The deliverables are skills, document templates, and check scripts. They are
   prompts and conventions for other projects, not an application.
-- Projects built with it (the first is `lightsout-labs/cellar`) live in their
+- Projects built with it (the first is `lightsout-labs/gridworks`) live in their
   own repositories.
 
 ## Workflow the plugin implements

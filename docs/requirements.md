@@ -52,7 +52,7 @@ These were agreed during planning and refine the requirements above.
   needed.
 - **Repositories** (GitHub organization `lightsout-labs`):
   - `nightshift`: the plugin (skills, document templates, check scripts).
-  - `cellar`: the first example, a spreadsheet editor.
+  - `gridworks`: the first example, a spreadsheet editor.
   - A tutorial site repository, created after the workflow is validated.
 - **Separation**: the factory lives in its own repository from the start, so
   each example repository's history is clean evidence of the workflow.
@@ -61,7 +61,7 @@ These were agreed during planning and refine the requirements above.
   acceptance.
 - **Integration**: one pull request per vertical slice, squash-merged, with
   auto-merge once CI is green.
-- **First example stack**: TypeScript for `cellar`. Rust is reserved for a
+- **First example stack**: TypeScript for `gridworks`. Rust is reserved for a
   later example, to show that the factory is language-agnostic.
 - **Language-agnostic contract**: the factory relies on a single `make check`
   entry point in each project and does not depend on a specific toolchain.
@@ -147,5 +147,5 @@ These were agreed during planning and refine the requirements above.
   - Check before stopping: during `build`, the agent cannot stop while
     `make check` fails, bounded by the retry limit.
   - There is no format-on-edit hook; `make check` already covers formatting.
-- **Deployment of `cellar`**: the web version is deployed to GitHub Pages by
+- **Deployment of `gridworks`**: the web version is deployed to GitHub Pages by
   the `release` stage.

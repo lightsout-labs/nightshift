@@ -10,7 +10,7 @@ secret in a public repository, and gives results that vary between runs.
 
 Automated tests cover only hooks, scripts, and plugin structure. Skill
 behavior is validated by building the example projects, starting with
-`cellar`.
+`gridworks`.
 
 ## Consequences
 
