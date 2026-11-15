@@ -74,7 +74,9 @@ stay enabled everywhere.
 There is no separate command to set a project up. `/nightshift:spec` also
 asks for the license and writes `LICENSE`, a first `README.md`, and a
 `.claude/settings.json` that enables the plugin for the project, so that a
-resumed session still has the hooks. If `approve` ever does nothing, the
+resumed session still has the hooks. Its status line records the context and
+plan usage, which `/nightshift:build` reports at the end of each slice, and
+displays nothing; in that project it replaces your own status line. If `approve` ever does nothing, the
 plugin is not loaded: check `/plugin`. The first slice completes the
 `README.md` and writes the project's `CLAUDE.md`.
 

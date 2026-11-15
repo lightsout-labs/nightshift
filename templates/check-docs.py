@@ -6,7 +6,6 @@ file and reason when:
 
 - a gated document has no valid `Status` line;
 - a backlog section is malformed, or more than one slice is `In progress`;
-- a `Done` slice has no pull request number;
 - a relative link in `docs/` points to a file that does not exist.
 
 This file is copied from the nightshift plugin and replaced when the plugin
@@ -20,7 +19,7 @@ import sys
 from pathlib import Path
 from urllib.parse import unquote
 
-VERSION = 1
+VERSION = 2
 
 DOCS = Path("docs")
 BACKLOG = DOCS / "backlog.md"
@@ -29,7 +28,6 @@ GATED = ("requirements.md", "architecture.md", "backlog.md", "delivery/*.md")
 _DOCUMENT_STATUS = re.compile(r"Status: (Draft|Approved)")
 _SLICE_HEADING = re.compile(r"## (S\d+): .+")
 _SLICE_STATUS = re.compile(r"Status: (Todo|In progress|Done)")
-_PULL_REQUEST = re.compile(r"PR: #\d+")
 _FENCE = re.compile(r"\s*(```|~~~)")
 _INLINE_CODE = re.compile(r"`[^`]*`")
 _LINK = re.compile(r"\[[^\]]*\]\(\s*<?([^)\s>]+)>?(?:\s+\"[^\"]*\")?\s*\)")
@@ -84,12 +82,6 @@ def _backlog_problems(lines: list[str]) -> list[str]:
             )
         elif status[1] == "In progress":
             in_progress.append(slice_id)
-        elif status[1] == "Done" and not any(
-            _PULL_REQUEST.fullmatch(line) for line in section
-        ):
-            problems.append(
-                f"{slice_id} is Done but has no pull request number (PR: #n)"
-            )
     if len(in_progress) > 1:
         problems.append(
             f"{' and '.join(in_progress)} are In progress; only one slice can be"

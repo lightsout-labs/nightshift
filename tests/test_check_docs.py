@@ -55,7 +55,6 @@ Slices, built in this order.
 ## S01: Walking skeleton
 
 Status: Done
-PR: #1
 
 Acceptance criteria:
 - The page loads.
@@ -195,13 +194,6 @@ def test_passes_after_a_release_has_emptied_the_backlog(consistent):
             id="two slices in progress",
         ),
         pytest.param(
-            "docs/backlog.md",
-            "PR: #1\n",
-            "",
-            ["docs/backlog.md", "S01", "pull request"],
-            id="done slice without a pull request number",
-        ),
-        pytest.param(
             "docs/architecture.md",
             "(adr/0001-storage.md ",
             "(adr/0002-storage.md ",
@@ -230,7 +222,7 @@ def test_fails_naming_the_file_and_the_reason(consistent, relative, old, new, re
 
 def test_reports_every_problem_in_one_run(consistent):
     change(consistent, "docs/requirements.md", "Status: Approved\n", "")
-    change(consistent, "docs/backlog.md", "PR: #1\n", "")
+    change(consistent, "docs/backlog.md", "Status: Todo", "Status: In progress")
     change(consistent, "docs/delivery/v1.0.0.md", "../backlog.md", "backlog.md")
 
     result = run_check_docs(cwd=consistent)

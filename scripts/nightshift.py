@@ -10,7 +10,9 @@ place.
 from __future__ import annotations
 
 import argparse
+import json
 import re
+import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -37,6 +39,10 @@ _STATUS_LINE = re.compile(rf"Status: ({DRAFT}|{APPROVED})")
 _SLICE_HEADING = re.compile(r"## (S\d+): .+")
 _SLICE_STATUS_LINE = re.compile(rf"Status: ({'|'.join(SLICE_STATUSES)})")
 _VERSION = re.compile(r"v\d+\.\d+\.\d+")
+
+# Where the project's status line saves what Claude Code passes to it, under
+# the git directory (see templates/settings.json).
+USAGE = "nightshift/usage.json"
 
 
 def find_project(start: str | Path) -> Path | None:
@@ -136,12 +142,40 @@ def _read_backlog() -> list[str]:
         raise BacklogError("not found; run this from the project root") from None
 
 
+def _notes_naming(lines: list[str], earlier: list[Slice], slice_id: str) -> list[str]:
+    """The `Notes` items of earlier slices that name `slice_id`, each
+    prefixed with the number of the slice that wrote it."""
+    named = re.compile(rf"\b{slice_id}\b")
+    found = []
+    for item in earlier:
+        section = lines[item.start : item.end]
+        if "Notes:" not in section:
+            continue
+        notes: list[list[str]] = []
+        for line in section[section.index("Notes:") + 1 :]:
+            if line.startswith("- "):
+                notes.append([line])
+            elif notes and line.startswith(" "):
+                notes[-1].append(line)
+            elif line.strip():
+                break
+        for note in notes:
+            if any(named.search(line) for line in note):
+                found.append(f"- {item.id}: {note[0][2:]}")
+                found.extend(note[1:])
+    return found
+
+
 def _next() -> int:
     lines = [line.rstrip("\r\n") for line in _read_backlog()]
     slices = backlog_slices(lines)
-    for item in slices:
+    for position, item in enumerate(slices):
         if item.status != DONE:
             print("\n".join(lines[item.start : item.end]).rstrip())
+            notes = _notes_naming(lines, slices[:position], item.id)
+            if notes:
+                print(f"\nNotes of earlier slices that name {item.id}:")
+                print("\n".join(notes))
             return 0
     if slices:
         print("No slice is left: every slice is Done.")
@@ -207,6 +241,39 @@ def _slice_status(text: str) -> str:
     raise argparse.ArgumentTypeError(f"{text!r} is not one of: {names}")
 
 
+def _usage() -> int:
+    """Print the context and plan usage that the status line last saved."""
+    try:
+        path = subprocess.run(
+            ["git", "rev-parse", "--git-path", USAGE],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+        saved = json.loads(Path(path).read_text())
+    except (OSError, ValueError, subprocess.CalledProcessError):
+        print(
+            "Usage unknown: .claude/settings.json has no nightshift status line"
+            " (see templates/settings.json in the plugin)."
+        )
+        return 0
+
+    def percent(*keys: str) -> str:
+        value = saved
+        for key in keys:
+            value = value.get(key) if isinstance(value, dict) else None
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            return f"{round(value)}%"
+        return "?"
+
+    print(
+        f"Context {percent('context_window', 'used_percentage')}"
+        f" · 5h {percent('rate_limits', 'five_hour', 'used_percentage')}"
+        f" · week {percent('rate_limits', 'seven_day', 'used_percentage')}"
+    )
+    return 0
+
+
 def _gate(documents: list[str]) -> int:
     closed = []
     for document in documents:
@@ -230,7 +297,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     gate.add_argument("documents", nargs="+", metavar="doc")
     commands.add_parser(
-        "next", help="print the section of the first slice that is not Done"
+        "next",
+        help="print the section of the first slice that is not Done, and the"
+        " notes of earlier slices that name it",
     )
     set_status = commands.add_parser(
         "set-status", help="change one slice's status in the backlog"
@@ -243,7 +312,12 @@ def main(argv: list[str] | None = None) -> int:
         "archive", help="move the slices, all Done, to docs/backlog/<version>.md"
     )
     archive.add_argument("version", type=_version, help="such as v1.2.0")
+    commands.add_parser(
+        "usage", help="print the context, 5-hour, and weekly usage last seen"
+    )
     args = parser.parse_args(argv)
+    if args.command == "usage":
+        return _usage()
     try:
         if args.command == "gate":
             return _gate(args.documents)

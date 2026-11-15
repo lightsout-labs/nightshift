@@ -60,7 +60,7 @@ and scripts depend on nothing else.
 | Path | Written by | Gated |
 |---|---|---|
 | `.nightshift` | `spec` | No. Empty marker file; hooks do nothing without it |
-| `.claude/settings.json` | `spec` | No. Enables the plugin, so every session in the project loads the hooks |
+| `.claude/settings.json` | `spec` | No. Enables the plugin, so every session in the project loads the hooks, and sets the status line that records usage |
 | `LICENSE` | `spec` | No. The license the human chose; absent if they want none |
 | `README.md` | `spec`, completed by `build` in the walking skeleton | No. Goal first; how to run, test, and deploy once that exists |
 | `docs/requirements.md` | `spec` | Yes |
@@ -86,7 +86,6 @@ together at the design gate.
 ## S03: Edit a cell and see dependent cells update
 
 Status: Todo | In progress | Done
-PR: #12
 
 Acceptance criteria:
 - ...
@@ -100,8 +99,14 @@ Notes:
 - At most one slice is `In progress`. This is also how the hooks know that
   `build` is running.
 - `Notes` holds what a fresh context needs to resume: decisions made in the
-  slice and failed fix attempts.
-- `PR` and `Notes` are added when there is something to record.
+  slice, failed fix attempts, and CI failures with their fixes. It is added
+  when there is something to record.
+- A note meant for a later slice names it by number, such as `S13`.
+  `nightshift.py next` prints it with that slice, which therefore sees it
+  without reading the rest of the backlog.
+- The pull request of a slice is found from its squashed commit on `main`,
+  whose title ends with `(Snn) (#n)`. Backlogs written before may also have
+  a `PR: #n` line, which nothing reads.
 - `release` moves the slices of a release to `docs/backlog/vX.Y.Z.md`, so
   the backlog holds only the release in progress and stays readable. Slice
   numbers continue across releases.
@@ -164,11 +169,14 @@ slice is already `In progress`, the run resumes it from its `Notes`.
    the slice's criteria.
 4. Update the affected documents, so that the review covers them, then run
    the `slice-reviewer` agent once and fix its findings.
-5. Open a pull request with the review result in the description. Set the
-   slice to `Done` with the pull request number, which the document check
-   requires, and enable auto-merge.
+5. Record in `Notes` what later slices need, set the slice to `Done`, and
+   push once; then open a pull request with the review result in the
+   description and enable auto-merge. A second push would start CI again
+   and cancel the first run. A failing check is fixed, and recorded in
+   `Notes`, in the same pull request.
 6. Wait for the merge, then stop and tell the human to run `/clear` and
-   `/nightshift:build` again. When no slice is left, tell the human to run
+   `/nightshift:build` again, with the line that `nightshift.py usage`
+   prints. When no slice is left, tell the human to run
    `/nightshift:release` instead.
 
 A failed fix is recorded in the slice's `Notes`. After three failed fixes of
@@ -178,8 +186,8 @@ When the backlog has no slices at all, which is its state between releases,
 `nightshift.py next` says so. `build` and `release` then have nothing to do
 and name `/nightshift:spec`, which starts the next release.
 
-`build` needs a GitHub remote and `gh`, because a `Done` slice must name its
-pull request. In every slice it compares the project's `check-docs.py` with
+`build` needs a GitHub remote and `gh`, because it opens and merges pull
+requests. In every slice it compares the project's `check-docs.py` with
 the plugin's by `--version` and copies a newer one.
 
 The skill itself launches no agent other than the reviewer in step 4. It
@@ -251,21 +259,30 @@ run stopped between steps 2 and 4. Like
 
 ## Scripts
 
-`scripts/nightshift.py` has four subcommands, so that skills never spend
+`scripts/nightshift.py` has five subcommands, so that skills never spend
 tokens on what can be computed:
 
 | Subcommand | Result |
 |---|---|
 | `gate <doc>...` | Exit 0 if every document is `Approved`; otherwise names the ones that are not |
-| `next` | Prints the section of the next slice to build, or reports that none is left, or that the backlog has no slices |
+| `next` | Prints the section of the next slice to build, followed by the `Notes` items of earlier slices that name it; or reports that none is left, or that the backlog has no slices |
 | `set-status <slice> <status>` | Updates one slice's status in the backlog; refuses a second slice `In progress` |
 | `archive <version>` | Moves every slice to `docs/backlog/<version>.md`, leaving the backlog's title, status, and introduction; refuses when a slice is not `Done`, when there is none, or when the file exists |
+| `usage` | Prints the context, 5-hour, and weekly usage, such as `Context 43% · 5h 27% · week 61%`, as the status line last recorded it |
 
 `next`, `set-status`, and `archive` read `docs/backlog.md` under the current
 directory, so skills run them from the project root. All fail, naming the
 slice, when a slice has no valid status line. `archive` moves the text as it
 is, so a relative link inside a slice breaks and the document check reports
 it.
+
+Claude Code passes the context and plan usage only to a status line command,
+not to hooks or tools. The project's status line, from the settings template,
+therefore saves its input to `.git/nightshift/usage.json` and displays
+nothing, and `usage` reads that file. A value Claude Code did not pass, such
+as plan limits in a session that uses an API key, prints as `?`; without the
+file, `usage` says how to add the status line. It always exits 0, because the
+report is information, not a check.
 
 The same file is the one place that knows the target project contract: the
 marker file, the gated paths, how a status line is read and approved, and
@@ -279,7 +296,6 @@ fails when:
 
 - a gated document has no valid `Status` line;
 - a backlog section is malformed, or more than one slice is `In progress`;
-- a `Done` slice has no pull request number;
 - a relative link in `docs/` points to a file that does not exist.
 
 It takes no arguments, reads `docs/` under the current directory, and prints
@@ -370,7 +386,9 @@ on the project, and the agent knows the text of the common licenses.
 plugin from it. Claude Code then offers to install the plugin when the
 project is trusted, and loads it in every session there, including one that
 is resumed. Without it, a session started without the plugin has no hooks,
-and typing `approve` does nothing.
+and typing `approve` does nothing. Its status line records usage for
+`nightshift.py usage`; as a project setting, it replaces the human's own
+status line in that project only.
 
 ## Implementation language
 
