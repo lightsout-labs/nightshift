@@ -199,3 +199,21 @@ def test_archive_never_overwrites_an_earlier_release(backlog):
     assert "v0.1.0" in result.stderr
     assert backlog.read_text() == done
     assert earlier.read_text() == "# Backlog of v0.1.0\n"
+
+
+def test_next_adds_the_notes_of_earlier_slices_that_name_it(backlog):
+    backlog.write_text(
+        BACKLOG.replace(
+            "PR: #1\n",
+            "PR: #1\n\nNotes:\n- S02 must reuse the grid,\n  not draw its own.\n"
+            "- Nothing for S20 or S2x.\n",
+        )
+    )
+
+    result = run_script("next", cwd=backlog.parent.parent)
+
+    assert result.stdout.endswith(
+        "- Formulas come later.\n\n"
+        "Notes of earlier slices that name S02:\n"
+        "- S01: S02 must reuse the grid,\n  not draw its own.\n"
+    )

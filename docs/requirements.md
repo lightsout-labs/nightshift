@@ -133,6 +133,19 @@ These were agreed during planning and refine the requirements above.
   the plugin for the project. A session that is resumed or started without
   the plugin would otherwise run without the hooks, and nothing could report
   it: `approve` would silently do nothing.
+- **Usage report**: at the end of each slice, `build` reports the context
+  used and the percentage used of the 5-hour and weekly plan limits, so the
+  human can pace the work. Claude Code passes these figures only to a status
+  line, so the project's settings set one that records them and displays
+  nothing; the report is shown once per slice, not continuously.
+- **Notes across slices**: a slice's `Notes` may tell a later slice what to
+  do. `build` reads only the slice it builds, so such a note names the later
+  slice by number and is shown with it by a script, not left to the agent to
+  find.
+- **One CI run per pull request**: `build` finishes the slice's documents
+  before it opens the pull request, so the pull request is pushed once. The
+  backlog therefore does not record the pull request number; the squashed
+  commit on `main` does.
 - **Backlog size**: `release` moves the finished slices to
   `docs/backlog/vX.Y.Z.md`, so `docs/backlog.md` holds only the release in
   progress.

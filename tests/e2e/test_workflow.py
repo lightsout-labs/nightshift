@@ -219,16 +219,6 @@ def test_design_gate(repository):
     assert session.script("set-status", "S01", "Done").returncode == 0
     assert session.script("next").stdout.startswith("## S02: ")
     assert session.gate(*design).returncode == 0
-
-    # A finished slice must record its pull request before `make check`
-    # passes again.
-    unrecorded = session.check_docs()
-    assert unrecorded.returncode == 1
-    assert "docs/backlog.md: S01" in unrecorded.stderr
-    backlog = repository / "docs" / "backlog.md"
-    backlog.write_text(
-        backlog.read_text().replace("Status: Done\n", "Status: Done\nPR: #1\n")
-    )
     assert session.check_docs().returncode == 0
 
 
@@ -347,9 +337,6 @@ def test_acceptance_gate(repository):
     # Every slice is built: the release moves them out of the backlog, which
     # stays approved and consistent with no slices in it.
     session.script("set-status", "S02", "done")
-    backlog.write_text(
-        backlog.read_text().replace("Status: Done\n", "Status: Done\nPR: #1\n")
-    )
     assert "No slice is left" in session.script("next").stdout
     assert session.script("archive", version).returncode == 0
     archive = repository / "docs" / "backlog" / f"{version}.md"

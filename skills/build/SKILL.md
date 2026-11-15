@@ -68,13 +68,13 @@ Once per slice. If `.git/nightshift/review-Snn.md` exists, go to 3.
 
 ## 5. Deliver
 
-1. Add to the slice's `Notes` the decisions a later slice needs to know.
-   Commit, push, and open a pull request titled `<type>: <summary> (Snn)`,
-   with the body from `PLUGIN/templates/pull-request.md`.
-2. Run `NS set-status Snn done`, add `PR: #<number>` on the line after the
-   status, run `make check`, commit, push, and `gh pr merge --squash --auto`.
-3. Run `gh pr checks --watch`. A failing check is a problem to fix as in
-   step 3. When the pull request has merged, switch to the updated `main`.
-4. Tell the human what was built in at most five lines, and: "Run `/clear`,
-   then `/nightshift:build`." If `NS next` reports that no slice is left,
-   name `/nightshift:release` instead. Stop.
+1. Add to `Notes` what a later slice needs, naming it by number. Run
+   `NS set-status Snn done` and `make check`, commit, push, open a pull
+   request titled `<type>: <summary> (Snn)` with the body from
+   `PLUGIN/templates/pull-request.md`, and `gh pr merge --squash --auto`.
+2. Run `gh pr checks --watch`. Fix a failing check as in step 3, adding to
+   `Notes` what failed and what fixed it. Once merged, switch to `main`.
+3. Tell the human what was built in at most five lines, the line that
+   `NS usage` prints, and: "Run `/clear`, then `/nightshift:build`." If
+   `NS next` reports that no slice is left, name `/nightshift:release`
+   instead. Stop.

@@ -34,7 +34,7 @@ below is `${CLAUDE_PLUGIN_ROOT}`, `NS` is
 1. Create the branch `chore/release-vX.Y.Z` from the latest `main`.
 2. In `CHANGELOG.md`, which starts with `# Changelog`, add
    `## vX.Y.Z - <date>` above the earlier versions: one line per slice, in
-   the user's terms, with its pull request number.
+   the user's terms, with the `(#n)` that ends its squashed commit on `main`.
 3. If the project records its version in a file, set it there.
 4. Run `NS archive vX.Y.Z`. It moves the slices to `docs/backlog/vX.Y.Z.md`
    and refuses while one is not `Done`. Fix any link that the move broke.
