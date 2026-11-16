@@ -84,7 +84,9 @@ def decide(event: dict) -> str | None:
         if _APPROVED_TEXT.search(command):
             return (
                 "A shell command must not contain the approved status text. Only "
-                "the human can approve a gated document, by typing `approve`."
+                "the human can approve a gated document, by typing `approve`. "
+                "To set a document back to `Draft`, use the Edit tool; do not "
+                "reword the command to get past this check."
             )
         if _starts_claude(command):
             return (

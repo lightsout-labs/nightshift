@@ -37,7 +37,10 @@ After you approve the requirements, design starts in the same session.
 `/nightshift:build` builds one slice and stops, so that each slice starts
 from a clean context; it resumes a slice that was interrupted.
 `/nightshift:slice` rewrites the backlog alone, for when the plan changes
-after the design is approved.
+after the design is approved. To add or change a requirement later, run
+`/nightshift:spec` again: it asks about the change, updates the requirements,
+the design where needed, and the backlog in one pull request, and stops for
+your `approve`.
 
 `/nightshift:release` runs when every slice is done. It tags and deploys the
 version, moves the finished slices to `docs/backlog/vX.Y.Z.md`, and writes

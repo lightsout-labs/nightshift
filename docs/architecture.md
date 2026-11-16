@@ -31,6 +31,7 @@ skills/
   ...                  build, release
   build/walking-skeleton.md
                        What only the first slice needs, read only then
+  spec/change.md       How spec changes a project under way, read only then
 agents/
   slice-reviewer.md    The only agent the plugin defines: the per-slice review
 hooks/
@@ -129,7 +130,7 @@ message to the human if a gate is closed.
 
 | Skill | Requires | Does | Ends |
 |---|---|---|---|
-| `spec` | Nothing | Asks clarifying questions until no requirement is ambiguous, proposes features and quality bars for the human to accept or decline, then writes `docs/requirements.md` from the template, `LICENSE`, a first `README.md`, and `.claude/settings.json` | Stops at the requirements gate |
+| `spec` | Nothing | Asks clarifying questions until no requirement is ambiguous, proposes features and quality bars for the human to accept or decline, then writes `docs/requirements.md` from the template, `LICENSE`, a first `README.md`, and `.claude/settings.json`. In a project under way (requirements approved, backlog exists), changes the requirements, the architecture where needed, and the backlog on one branch | Stops at the requirements gate |
 | `design` | Requirements approved | Writes `docs/architecture.md` and ADRs, then runs `slice` | Stops at the design gate |
 | `slice` | Requirements approved, architecture exists | Writes `docs/backlog.md`: a walking skeleton first, then vertical slices with acceptance criteria | Returns to `design`, or stops at a gate for the backlog if run alone |
 | `build` | Architecture and backlog approved | Builds the next slice (see below) | Stops after one slice |
@@ -149,7 +150,7 @@ A gate costs the human one word. When a stage reaches a gate, the skill:
 
 | Gate | After `approve` |
 |---|---|
-| Requirements | Starts `design` in the same session; the clarifying answers are useful context for it |
+| Requirements | Starts `design` in the same session; the clarifying answers are useful context for it. For a change to a project under way, stops and asks for `/clear` and `/nightshift:build` |
 | Design | Stops and asks for `/clear` and `/nightshift:build`, so the first slice starts clean |
 | Acceptance | Closes the release; nothing follows |
 
@@ -341,7 +342,9 @@ Details:
 - Gate protection decides on the result of an edit, not on its text: it
   applies the edit in memory and blocks when the file would gain an approved
   status line. Replacing the single word `Draft` is therefore blocked, and
-  quoting the status in a document body is not.
+  quoting the status in a document body is not. A shell command is matched
+  on its text, so it also blocks setting a document back to `Draft` that
+  way; its message points the agent to the Edit tool instead.
 - Gate protection also blocks shell commands that start a nested `claude`
   session, since a prompt submitted there would count as human input.
 - `main` protection judges each git command by the branch it would run on,

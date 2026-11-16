@@ -1,6 +1,6 @@
 ---
 name: spec
-description: Start a nightshift project. Asks clarifying questions, writes docs/requirements.md as a draft, and stops for the human's approval.
+description: Start a nightshift project, or change the requirements of one under way. Asks clarifying questions, writes docs/requirements.md as a draft, and stops for the human's approval.
 disable-model-invocation: true
 ---
 
@@ -14,7 +14,9 @@ launch agents.
 
 Read what the human gave you: the arguments to this command, any notes file
 they point to, and an existing `docs/requirements.md` if there is one (then
-you are revising it, not starting over).
+you are revising it, not starting over). If it is `Approved` and
+`docs/backlog.md` exists, follow `${CLAUDE_PLUGIN_ROOT}/skills/spec/change.md`
+instead of the steps below.
 
 ## 2. Ask
 
