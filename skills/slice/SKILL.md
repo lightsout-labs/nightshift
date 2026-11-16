@@ -21,7 +21,8 @@ does not exist, tell the human that `/nightshift:spec` and
 
 Copy `${CLAUDE_PLUGIN_ROOT}/templates/backlog.md` to `docs/backlog.md` and
 replace its slices with the real ones. If a backlog exists, revise it instead:
-leave `Done` slices as they are and set the document to `Status: Draft`.
+leave `Done` slices as they are and set the document to `Status: Draft`
+with the Edit tool.
 Number new slices after the highest number in the backlog and in the files
 of earlier releases under `docs/backlog/`.
 

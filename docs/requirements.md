@@ -146,6 +146,12 @@ These were agreed during planning and refine the requirements above.
   before it opens the pull request, so the pull request is pushed once. The
   backlog therefore does not record the pull request number; the squashed
   commit on `main` does.
+- **Requirement changes**: when the human adds to or changes the requirements
+  of a project under way, `spec` handles the change on one `docs/` branch: it
+  asks about the change, edits the requirements, revises the architecture
+  only where the design changes, adds slices, sets the changed documents to
+  `Draft`, and stops at one gate. After `approve` it asks for `/clear` and
+  `/nightshift:build`, rather than running `design` again.
 - **Backlog size**: `release` moves the finished slices to
   `docs/backlog/vX.Y.Z.md`, so `docs/backlog.md` holds only the release in
   progress.
