@@ -18,7 +18,8 @@ is the slice's number.
    human what it printed and that `/nightshift:design` comes first, and stop.
 2. Run `NS next`. If every slice is done, tell the human to run `/clear`,
    then `/nightshift:release`; if the backlog has none, `/nightshift:spec`. Stop.
-3. Read `docs/architecture.md`, and only the code the slice touches.
+3. Read `docs/architecture.md`, the files in `docs/design/` of the modules
+   the slice touches, and only the code the slice touches.
 4. `Status: Todo`: create the branch `feat/<short-kebab-title>` from the
    latest `main` and run `NS set-status Snn in-progress`.
    `Status: In progress`: you are resuming. Switch to the slice's branch and
@@ -40,9 +41,13 @@ Write code until `make check` and `make e2e` pass. Keep it simple in scope,
 not in quality: nothing for a later slice or a need no criterion states.
 
 - Deep modules: few operations in each interface, substantial behavior
-  behind it. Follow the architecture document; if it is wrong, change it in
-  this slice. A decision that is costly to reverse gets an ADR from
-  `PLUGIN/templates/adr.md`.
+  behind it. Follow the architecture document and the module design; if
+  either is wrong, change it in this slice.
+- Record each decision the code does not make obvious, with its reason. One
+  inside a module goes in `docs/design/<module>.md`, named after the module
+  in the architecture document; one that spans modules goes in the
+  architecture document; one that is costly to reverse gets an ADR from
+  `PLUGIN/templates/adr.md`. Do not repeat what the code says.
 - Never weaken a test, the coverage floor, or a lint rule to pass a check.
 - If a criterion is ambiguous in a way that changes behavior, ask the human
   with AskUserQuestion. Decide everything else yourself.
@@ -57,10 +62,11 @@ not in quality: nothing for a later slice or a need no criterion states.
 
 Once per slice. If `.git/nightshift/review-Snn.md` exists, go to 3.
 
-1. Update every document the slice affects: architecture, README, ADRs. Run
-   `make check` and commit. Run `mkdir -p .git/nightshift`, then
-   `git diff main...HEAD > .git/nightshift/review.diff` and
-   `NS next > .git/nightshift/slice.md`.
+1. Update every document the slice affects, run `make check`, and commit.
+   In `.git/nightshift/` (`mkdir -p` it), write `git diff main...HEAD` to
+   `review.diff`, `NS next` to `slice.md`, and the `docs/design/` files of
+   the modules the diff touches, one after another, to `design.md`; leave
+   `design.md` empty if those modules have none.
 2. Launch the `nightshift:slice-reviewer` agent with the prompt "Review the
    slice." and no word more. Save its reply as `.git/nightshift/review-Snn.md`.
 3. Fix every blocking finding in that file, and each minor one that is

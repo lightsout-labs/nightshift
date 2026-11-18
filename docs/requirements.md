@@ -121,6 +121,13 @@ These were agreed during planning and refine the requirements above.
   of I/O, UI, and framework code, and gives each piece of knowledge one
   owning module. Other practices are used only where a requirement calls for
   them.
+- **Design in two levels**: the architecture document holds what spans
+  modules and stays short, because every slice reads it. The decisions made
+  inside one module, with their reasons, go in that module's file under
+  `docs/design/`, which only the slices touching the module read. Neither
+  repeats what the code says. Found in `gridworks`, whose architecture
+  document grew to 65 KB after 30 slices, most of it decisions inside
+  modules.
 - **Rules outside the skills**: the project's `CLAUDE.md` repeats the rules
   on simplicity, deep modules, and tests in one line each, so they also hold
   for work done without a skill.

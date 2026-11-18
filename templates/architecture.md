@@ -4,7 +4,8 @@ Status: Draft
 
 How <project> is built. What it must do is in
 [requirements.md](requirements.md). Reasons for the decisions that are costly
-to reverse are in the ADRs under `docs/adr/`.
+to reverse are in the ADRs under `docs/adr/`. This document holds what spans
+modules; the decisions inside one module are in `docs/design/<module>.md`.
 
 ## Overview
 
