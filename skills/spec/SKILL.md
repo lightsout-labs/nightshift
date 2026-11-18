@@ -12,8 +12,8 @@ launch agents.
 
 ## 1. Understand
 
-Read what the human gave you: the arguments to this command, any notes file
-they point to, and an existing `docs/requirements.md` if there is one (then
+Read what the human gave you: the arguments to this command, the GitHub
+issues they name (`gh issue view <n>`), any notes file they point to, and an existing `docs/requirements.md` if there is one (then
 you are revising it, not starting over). If it is `Approved` and
 `docs/backlog.md` exists, follow `${CLAUDE_PLUGIN_ROOT}/skills/spec/change.md`
 instead of the steps below.

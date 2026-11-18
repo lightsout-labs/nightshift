@@ -13,7 +13,9 @@ gate. Write everything in English. Do the work yourself; do not launch agents.
    `${CLAUDE_PLUGIN_ROOT}/skills/design/SKILL.md`.
 5. **Slices**: add slices for the change to `docs/backlog.md`, following
    step 2 of `${CLAUDE_PLUGIN_ROOT}/skills/slice/SKILL.md`. Change a slice
-   that is not `Done` rather than adding one, where that is simpler.
+   that is not `Done` rather than adding one, where that is simpler. A slice
+   that does what an issue asks has `Closes: #<n>` under its status line, so
+   its pull request closes the issue.
 6. **Reopen the gate**: set every document you changed to `Status: Draft`,
    with the Edit tool.
 7. Commit with the message `docs: <summary of the change>`, push, and open a
