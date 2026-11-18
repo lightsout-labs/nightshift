@@ -41,9 +41,13 @@ Write code until `make check` and `make e2e` pass. Keep it simple in scope,
 not in quality: nothing for a later slice or a need no criterion states.
 
 - Deep modules: few operations in each interface, substantial behavior
-  behind it. Follow the design; if it is wrong, change it in this slice.
-  Record why for choices the code does not show: in `docs/design/<module>.md`,
-  the architecture if they span modules, an ADR if costly to reverse.
+  behind it. Follow the architecture document and the module design; if
+  either is wrong, change it in this slice.
+- Record each decision the code does not make obvious, with its reason. One
+  inside a module goes in `docs/design/<module>.md`, named after the module
+  in the architecture document; one that spans modules goes in the
+  architecture document; one that is costly to reverse gets an ADR from
+  `PLUGIN/templates/adr.md`. Do not repeat what the code says.
 - Never weaken a test, the coverage floor, or a lint rule to pass a check.
 - If a criterion is ambiguous in a way that changes behavior, ask the human
   with AskUserQuestion. Decide everything else yourself.
@@ -61,7 +65,8 @@ Once per slice. If `.git/nightshift/review-Snn.md` exists, go to 3.
 1. Update every document the slice affects, run `make check`, and commit.
    In `.git/nightshift/` (`mkdir -p` it), write `git diff main...HEAD` to
    `review.diff`, `NS next` to `slice.md`, and the `docs/design/` files of
-   the modules the diff touches, one after another, to `design.md`.
+   the modules the diff touches, one after another, to `design.md`; leave
+   `design.md` empty if those modules have none.
 2. Launch the `nightshift:slice-reviewer` agent with the prompt "Review the
    slice." and no word more. Save its reply as `.git/nightshift/review-Snn.md`.
 3. Fix every blocking finding in that file, and each minor one that is
@@ -76,5 +81,6 @@ Once per slice. If `.git/nightshift/review-Snn.md` exists, go to 3.
 2. Run `gh pr checks --watch`. Fix a failing check as in step 3, adding to
    `Notes` what failed and what fixed it. Once merged, switch to `main`.
 3. Tell the human what was built in at most five lines, the line that
-   `NS usage` prints, and: "Run `/clear`, then `/nightshift:build`.", or
-   `/nightshift:release` if `NS next` reports no slice left. Stop.
+   `NS usage` prints, and: "Run `/clear`, then `/nightshift:build`." If
+   `NS next` reports that no slice is left, name `/nightshift:release`
+   instead. Stop.

@@ -6,7 +6,12 @@ import re
 import pytest
 from conftest import ROOT
 
-SKILL_LINE_BUDGET = 80
+# Every line of a skill is read on every run, and each added rule weakens the
+# others. Raised from 80 to 90 when the design was split in two levels: at 80,
+# `build` had to drop the ADR template and blur its instructions to fit, and
+# an unclear instruction costs more than a few lines. Move what only one case
+# needs to a file beside the skill before raising it again.
+SKILL_LINE_BUDGET = 90
 SKILLS = sorted((ROOT / "skills").glob("*/SKILL.md"))
 AGENTS = sorted((ROOT / "agents").glob("*.md"))
 

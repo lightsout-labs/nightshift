@@ -417,7 +417,7 @@ through `uv`, which installs them from `pyproject.toml` on first use.
 | Level | Covers | How |
 |---|---|---|
 | Unit | Backlog and status parsing, each `check-docs` rule, each hook's decision | `pytest`, through each script's command-line interface |
-| Structure | Manifests are valid, every skill has frontmatter and stays under a line budget, every plugin file that a skill names exists, the settings template names this marketplace and plugin, the reviewer is the only agent, has no tool but `Read`, and is named only by `build` | `pytest` |
+| Structure | Manifests are valid, every skill has frontmatter and stays within a budget of 90 lines (see the comment in `tests/test_structure.py` before raising it), every plugin file that a skill names exists, the settings template names this marketplace and plugin, the reviewer is the only agent, has no tool but `Read`, and is named only by `build` | `pytest` |
 | End to end (`make e2e`) | Hooks and scripts against a temporary git repository that plays a target project through all stages | `pytest`, with hook input fed as Claude Code sends it |
 | Skills | Whether the prompts produce the intended behavior | Building `gridworks`; problems found there become slices here |
 
