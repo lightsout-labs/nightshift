@@ -17,11 +17,13 @@ is the slice's number.
 1. Run `NS gate docs/architecture.md docs/backlog.md`. If it fails, tell the
    human what it printed and that `/nightshift:design` comes first, and stop.
 2. Run `NS next`. If every slice is done, tell the human to run `/clear`,
-   then `/nightshift:release`; if the backlog has none, `/nightshift:spec`. Stop.
+   then `/nightshift:release`; if the backlog has none, `/nightshift:spec`,
+   or `/nightshift:fix` for reported defects. Stop.
 3. Read `docs/architecture.md`, the files in `docs/design/` of the modules
    the slice touches, and only the code the slice touches.
-4. `Status: Todo`: create the branch `feat/<short-kebab-title>` from the
-   latest `main` and run `NS set-status Snn in-progress`.
+4. `Status: Todo`: create the branch `feat/<short-kebab-title>` (`fix/` when
+   the slice has a `Fixes` line) from the latest `main` and run
+   `NS set-status Snn in-progress`.
    `Status: In progress`: you are resuming. Switch to the slice's branch and
    read its `Notes`, `git log main..`, and `git status`. Carry on from what
    is there, and do not repeat a fix that `Notes` records as failed.
@@ -78,6 +80,7 @@ Once per slice. If `.git/nightshift/review-Snn.md` exists, go to 3.
    `NS set-status Snn done` and `make check`, commit, push, open a pull
    request titled `<type>: <summary> (Snn)` with the body from
    `PLUGIN/templates/pull-request.md`, and `gh pr merge --squash --auto`.
+   A slice with a `Fixes` line is of type `fix`.
 2. Run `gh pr checks --watch`. Fix a failing check as in step 3, adding to
    `Notes` what failed and what fixed it. Once merged, switch to `main`.
 3. Tell the human what was built in at most five lines, the line that

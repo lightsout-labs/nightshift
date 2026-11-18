@@ -42,7 +42,11 @@ As it builds, it records the decisions inside each module in
 after the design is approved. To add or change a requirement later, run
 `/nightshift:spec` again: it asks about the change, updates the requirements,
 the design where needed, and the backlog in one pull request, and stops for
-your `approve`.
+your `approve`. To fix bugs reported as GitHub issues, run
+`/nightshift:fix` with their numbers, or alone for every open issue: each
+issue that shows the product breaking an approved requirement becomes a fix
+slice at the front of the backlog, with no gate, and its pull request closes
+the issue; the others are named for `/nightshift:spec`.
 
 `/nightshift:release` runs when every slice is done. It tags and deploys the
 version, moves the finished slices to `docs/backlog/vX.Y.Z.md`, and writes

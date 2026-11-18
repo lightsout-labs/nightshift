@@ -26,8 +26,8 @@ below is `${CLAUDE_PLUGIN_ROOT}`, `NS` is
      that version at step 3, skipping what is done. Otherwise tell the human
      there is nothing to release and `/nightshift:spec` starts the next, and stop.
 4. Choose the version: `v0.1.0` with no `v*` tag. Otherwise raise the latest
-   tag's minor number, its patch number when every slice is a fix, or its
-   major number only when the requirements say compatibility breaks.
+   tag's minor number, its patch number when every slice has a `Fixes` line,
+   or its major number only when the requirements say compatibility breaks.
 
 ## 2. Changelog and archive
 

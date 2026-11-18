@@ -398,3 +398,32 @@ Notes:
 - This repository keeps one architecture document: it is about 24 KB, mostly
   the contract with a target project, which spans every part, and no skill
   reads it on every slice.
+
+## S13: Fix reported defects
+
+Status: Done
+
+Acceptance criteria:
+- `/nightshift:fix` with issue numbers, or alone for every open issue,
+  sorts each issue as a defect against an approved requirement, a change
+  that no requirement states, or not a problem, and asks the human only
+  when it cannot tell *(by hand)*.
+- Each defect gets a fix slice with a `Fixes: #n` line, numbered after the
+  highest slice and placed before the first `Todo` slice, merged without a
+  gate; changes are named for `/nightshift:spec` *(by hand)*.
+- `build` builds a fix slice on a `fix/` branch with a `fix:` pull request
+  whose description closes its issues *(by hand)*.
+- `spec` reads the issues it is given, and a slice for one has a
+  `Closes: #n` line *(by hand)*.
+- `release` raises the patch number when every slice has a `Fixes` line
+  *(by hand)*.
+- `check-docs.py` and `nightshift.py` accept the `Fixes` and `Closes` lines
+  unchanged, as they accepted `PR: #n`.
+
+Notes:
+- Added after S12 without a slice. `gridworks` had its first three issues
+  filed after 30 slices, and the only ways to add a slice were a
+  requirement change through `spec` or a rewrite of the backlog through
+  `slice`, both behind a gate, though a defect changes nothing agreed.
+- The *(by hand)* criteria are not yet verified; they are when `gridworks`
+  runs `fix` on its open issues.

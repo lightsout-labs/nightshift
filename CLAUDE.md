@@ -23,6 +23,7 @@ choices.
 | `slice` | Backlog of vertical slices with acceptance criteria | Reviewed with design |
 | `build` | Code and tests, one PR per slice | None |
 | `release` | Version, changelog, deployment, delivery report | Accept |
+| `fix` | Fix slices for issues that report defects | None |
 
 Gated documents carry a `Status: Draft | Approved` header. A stage must refuse
 to run when the document it depends on is not approved.

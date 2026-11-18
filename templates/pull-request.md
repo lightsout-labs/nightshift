@@ -1,5 +1,8 @@
 Slice: S<nn> <title>
 
+<`Fixes #<n>` or `Closes #<n>` for each issue in the slice's `Fixes` or
+`Closes` line, one per line, so that merging closes it; nothing without one.>
+
 ## What changed
 
 - <One line per behavior the slice adds, in the user's terms.>

@@ -159,6 +159,15 @@ These were agreed during planning and refine the requirements above.
   only where the design changes, adds slices, sets the changed documents to
   `Draft`, and stops at one gate. After `approve` it asks for `/clear` and
   `/nightshift:build`, rather than running `design` again.
+- **Reported defects**: an issue on GitHub that reports a defect, where the
+  product does not do what an approved requirement says, becomes a fix
+  slice without a gate, since nothing agreed changes: `fix` adds it before
+  the slices still to do, and `build` fixes it like any slice, test first,
+  and closes the issue with its pull request. An issue that asks for
+  something no requirement states is a requirement change and goes through
+  `spec`. A release whose slices are all fixes raises the patch number.
+  Found in `gridworks`, whose first issues were filed after 30 slices with
+  no way into the backlog short of a requirement change.
 - **Backlog size**: `release` moves the finished slices to
   `docs/backlog/vX.Y.Z.md`, so `docs/backlog.md` holds only the release in
   progress.

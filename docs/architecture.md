@@ -28,7 +28,7 @@ context.
   marketplace.json     Marketplace with one entry, source "./"
 skills/
   spec/SKILL.md        One directory per stage: spec, design, slice,
-  ...                  build, release
+  ...                  build, release; and fix, for reported defects
   build/walking-skeleton.md
                        What only the first slice needs, read only then
   spec/change.md       How spec changes a project under way, read only then
@@ -107,6 +107,9 @@ Notes:
   not `Done`.
 - At most one slice is `In progress`. This is also how the hooks know that
   `build` is running.
+- A slice that fixes a defect reported as a GitHub issue has a
+  `Fixes: #n, #m` line under its status; one that does what an issue asks
+  for, a `Closes: #n` line. Its pull request then closes the issues.
 - `Notes` holds what a fresh context needs to resume: decisions made in the
   slice, failed fix attempts, and CI failures with their fixes. It is added
   when there is something to record.
@@ -142,6 +145,7 @@ message to the human if a gate is closed.
 | `design` | Requirements approved | Writes `docs/architecture.md` and ADRs, then runs `slice` | Stops at the design gate |
 | `slice` | Requirements approved, architecture exists | Writes `docs/backlog.md`: a walking skeleton first, then vertical slices with acceptance criteria | Returns to `design`, or stops at a gate for the backlog if run alone |
 | `build` | Architecture and backlog approved | Builds the next slice (see below) | Stops after one slice |
+| `fix` | Requirements, architecture, and backlog approved | Reads GitHub issues and sorts them: a defect, where the product does not do what an approved requirement says, gets a fix slice placed before the slices still to do; an issue that asks for something new is left to `spec`. Merges the backlog change without a gate, since nothing agreed changes | Asks for `/clear` and `/nightshift:build` |
 | `release` | All slices `Done` | Tags a version, writes the changelog, deploys, archives the backlog, writes the delivery report | Stops at the acceptance gate |
 
 ### Gates
@@ -245,7 +249,8 @@ requests, because the version is tagged on `main` and the human accepts
 something that is already deployed:
 
 1. Choose the version: `v0.1.0` first, then the latest tag with the minor
-   number raised, the patch number when every slice is a fix, or the major
+   number raised, the patch number when every slice has a `Fixes` line, or
+   the major
    number only when the requirements say the release breaks compatibility.
 2. On the branch `chore/release-vX.Y.Z`: add the version's section to
    `CHANGELOG.md`, with one line per slice, set the version where the project
