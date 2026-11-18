@@ -41,7 +41,10 @@ changes the design. Decide everything else yourself:
 3. For each decision that is costly to reverse, copy
    `${CLAUDE_PLUGIN_ROOT}/templates/adr.md` to `docs/adr/NNNN-<title>.md`,
    numbered from `0001`, and link it from the architecture document. Other
-   decisions need one line of reasoning in the document, not an ADR.
+   decisions need one line of reasoning, not an ADR: in the architecture
+   document when they span modules, and in `docs/design/<module>.md` when
+   they are inside one. Every slice reads the architecture document, so keep
+   it to the whole; `build` adds to a module's file as it goes.
 4. Read `${CLAUDE_PLUGIN_ROOT}/skills/slice/SKILL.md` and follow its steps 2
    and 3 to write `docs/backlog.md`. Then come back here.
 

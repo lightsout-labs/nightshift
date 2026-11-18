@@ -67,6 +67,7 @@ and scripts depend on nothing else.
 | `docs/requirements.md` | `spec` | Yes |
 | `docs/architecture.md` | `design` | Yes |
 | `docs/adr/NNNN-<title>.md` | `design`, `build` | No |
+| `docs/design/<module>.md` | `design`, `build` | No. The decisions inside one module of the architecture document, each with its reason; created when a module has its first one |
 | `docs/backlog.md` | `slice`, updated by `build` | Yes |
 | `docs/backlog/vX.Y.Z.md` | `release` | No. The finished slices of one release |
 | `docs/delivery/vX.Y.Z.md` | `release` | Yes; approval is the acceptance |
@@ -78,6 +79,13 @@ A gated document has `Status: Draft` or `Status: Approved` as the first line
 after its title. The human approves by typing `approve` in Claude Code (see
 [Gates](#gates)). The architecture document and the backlog are approved
 together at the design gate.
+
+Design is in two levels, so that a slice reads only what it needs (see
+[ADR 0005](adr/0005-design-in-two-levels.md)). The architecture document
+holds what spans modules, and every slice reads it. A module's file in
+`docs/design/` holds the decisions inside that module, and only the slices
+that touch the module read it. It has no status: like an ADR, it records
+decisions made while building, within the approved architecture.
 
 ### Backlog format
 
@@ -205,8 +213,9 @@ the skill.
 ### The slice reviewer
 
 `agents/slice-reviewer.md` defines a read-only agent: its only tool is
-`Read`. It reads the branch diff, the slice's backlog section, and
-`docs/architecture.md`, and nothing else. It returns a result line and a
+`Read`. It reads the branch diff, the slice's backlog section,
+`docs/architecture.md`, and the design of the modules the slice touches, and
+nothing else. It returns a result line and a
 list of findings, each marked as blocking or minor, against four questions:
 are the acceptance criteria met, are modules deep with no leaking interfaces
 and nothing built beyond the criteria, are the tests meaningful, and are
@@ -214,7 +223,10 @@ there obvious security problems.
 
 `build` hands over the first two as files, `.git/nightshift/review.diff` and
 `.git/nightshift/slice.md`, which it writes with `git diff main...HEAD` and
-`nightshift.py next`. The reviewer therefore needs no shell, and the builder
+`nightshift.py next`, and the last as `.git/nightshift/design.md`, the
+modules' files in `docs/design/` one after another, because the reviewer
+cannot list a directory and the builder knows which modules it touched.
+The reviewer therefore needs no shell, and the builder
 never repeats the diff as prompt text. The prompt is the fixed sentence
 "Review the slice.", so nothing of the builder's view of its own work reaches
 the reviewer.

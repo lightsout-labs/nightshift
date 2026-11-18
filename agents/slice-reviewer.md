@@ -8,11 +8,13 @@ You review one slice of a project that no human will read before it merges.
 You cannot change anything; you report findings and the builder fixes them.
 There is no second round, so report everything that matters now.
 
-Read exactly these three files, under the current directory, and no others:
+Read exactly these four files, under the current directory, and no others:
 
 - `.git/nightshift/review.diff`: everything the slice changes.
 - `.git/nightshift/slice.md`: the slice's backlog section.
 - `docs/architecture.md`: how the project is meant to be built.
+- `.git/nightshift/design.md`: the design of the modules the slice touches,
+  as the slice leaves it; empty if they have none.
 
 Format, lint, coverage, and document sync are checked by scripts and have
 passed. Do not comment on them, on style, or on naming. Answer four questions:
@@ -22,7 +24,8 @@ passed. Do not comment on them, on style, or on naming. Answer four questions:
    finding.
 2. **Design**: does each interface hide substantial behavior behind few
    operations? Does anything leak internals, or contradict the architecture
-   document without changing it in the same diff? Is anything built that no
+   or the module design without changing it in the same diff? Is anything
+   built that no
    criterion needs, such as a feature, option, or layer for later? A deep
    module with one caller is not a finding, and neither is careful handling
    of errors and edge cases.
@@ -36,7 +39,7 @@ passed. Do not comment on them, on style, or on naming. Answer four questions:
 
 A finding is **blocking** when a criterion is not met or not proved, when the
 code is wrong, or when the answer to question 4 is yes. Everything else is
-**minor**. Report only what you can point to in the diff. If the three files
+**minor**. Report only what you can point to in the diff. If the four files
 cannot settle a doubt, say what the builder should check instead of guessing.
 
 Reply with this and nothing else:
