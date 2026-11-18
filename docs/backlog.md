@@ -364,3 +364,37 @@ Notes:
 - `slice` run alone also sets the backlog to `Draft` with the Edit tool.
 - The two *(by hand)* criteria are not yet verified; they are when
   `gridworks` next changes its requirements.
+
+## S12: Design in two levels
+
+Status: Done
+PR: #16
+
+Acceptance criteria:
+- `design` writes an architecture document that holds what spans modules:
+  the parts, the stack, the module table with each interface, boundaries,
+  data, layout, testing, deployment, and decisions that involve more than one
+  module *(by hand)*.
+- `build` reads the architecture document and the `docs/design/<module>.md`
+  files of the modules the slice touches, and records each decision at its
+  level: inside one module in its module file, across modules in the
+  architecture document, costly to reverse in an ADR *(by hand)*.
+- `build` writes those module files to `.git/nightshift/design.md`, empty if
+  there are none, and the slice reviewer checks the diff against them as
+  well as the architecture *(by hand)*.
+- Module files are not gated; `check-docs.py` and the hooks are unchanged.
+- The skill line budget is 90, with its reason beside it in
+  `tests/test_structure.py`.
+
+Notes:
+- Added after S08 without a slice. The `gridworks` architecture document
+  reached 65 KB after 30 slices, 700 of its 870 lines decisions inside single
+  modules, and `build` and the reviewer read all of it on every slice. The
+  decision is ADR 0005.
+- Projects designed before this keep working. Moving `gridworks`' decisions
+  out of its architecture document is a change in that project.
+- The *(by hand)* criteria are not yet verified; they are when `gridworks`
+  builds slices after that move.
+- This repository keeps one architecture document: it is about 24 KB, mostly
+  the contract with a target project, which spans every part, and no skill
+  reads it on every slice.
