@@ -278,3 +278,89 @@ Notes:
   release sets them back to `Draft`.
 - The five *(by hand)* criteria are not yet verified; they are when `gridworks`
   reaches its first release.
+
+## S09: Repository documents and plugin loading
+
+Status: Done
+PR: #12
+
+Acceptance criteria:
+- `spec` asks for the license unless a `LICENSE` file exists, and writes
+  `LICENSE`, a first `README.md`, and `.claude/settings.json` beside the
+  requirements draft, keeping what existing files say *(by hand)*.
+- The walking skeleton adds to `README.md` how to install, run, and test the
+  project, and where it is deployed *(by hand)*.
+- `templates/settings.json` enables this plugin from this marketplace, and a
+  structure test keeps it in step with both manifests.
+
+Notes:
+- Added after S08 without a slice, from what building `gridworks` showed: no
+  stage wrote `LICENSE` or `README.md`, and a session resumed without
+  `--plugin-dir` had no hooks, so `approve` silently did nothing.
+- There is no initialization command; `spec` is where a project starts.
+  `CLAUDE.md` stays with the walking skeleton, because the commands are not
+  known before the design.
+- The two *(by hand)* criteria were verified when `gridworks` started.
+
+## S10: Usage report, notes across slices, one CI run per pull request
+
+Status: Done
+PR: #14
+
+Acceptance criteria:
+- The project's status line, from `templates/settings.json`, saves what
+  Claude Code passes to it in `.git/nightshift/usage.json` and displays
+  nothing. `nightshift.py usage` prints the context, 5-hour, and weekly
+  usage from it, or says the status line is missing.
+- `build` reports that line at the end of each slice *(by hand)*.
+- `nightshift.py next` also prints the `Notes` items of earlier slices that
+  name the slice by number.
+- `build` sets the slice `Done` before it opens the pull request, so the
+  branch is pushed once and CI runs once. `check-docs.py` (version 2) no
+  longer requires a `PR: #n` line, and `release` takes the number from the
+  squashed commit on `main`.
+- A CI failure fixed in `build` is recorded in `Notes` in the same pull
+  request *(by hand)*.
+
+Notes:
+- Added after S08 without a slice, from the first twelve slices of
+  `gridworks`: a note one slice left for the next did not reach it, every
+  slice ran CI twice because a second push added `PR: #n`, and the CI fixes
+  of one slice needed a pull request of their own to reach `Notes`. Slice
+  numbers of `gridworks` are not written here, because `next` would show
+  such a note with this backlog's slice of the same number.
+- Claude Code passes context and plan usage only to a status line, so the
+  report is once per slice, not continuous. In a project the nightshift
+  status line replaces the human's own.
+- The slices above keep their `PR: #n` lines; slices from here on have one
+  only when the squashed commit does not name the slice.
+- The *(by hand)* criteria were verified by the `gridworks` slices built
+  after this change.
+
+## S11: Requirement changes in a project under way
+
+Status: Done
+PR: #15
+
+Acceptance criteria:
+- When the requirements are `Approved` and a backlog exists, `spec` follows
+  `skills/spec/change.md`: it asks about the change only, and on one `docs/`
+  branch edits the requirements, revises the architecture only where the
+  design changes, adds or changes slices, sets the changed documents to
+  `Draft`, and stops at one gate *(by hand)*.
+- After `approve` it merges and asks for `/clear` and `/nightshift:build`,
+  rather than running `design` again *(by hand)*.
+- Gate protection's message for a shell command that contains the approved
+  status text says to set a document back to `Draft` with the Edit tool and
+  not to reword the command.
+
+Notes:
+- Added after S08 without a slice. Adding fill-handle features to
+  `gridworks` mid-build found that no skill covered the change: the agent
+  read the plugin's skill files and improvised, and reworded a shell command
+  that gate protection had blocked.
+- This closes the gap S08 left: `spec` now says that revising approved
+  requirements sets them back to `Draft`.
+- `slice` run alone also sets the backlog to `Draft` with the Edit tool.
+- The two *(by hand)* criteria are not yet verified; they are when
+  `gridworks` next changes its requirements.
