@@ -36,6 +36,8 @@ nowhere else.
 After you approve the requirements, design starts in the same session.
 `/nightshift:build` builds one slice and stops, so that each slice starts
 from a clean context; it resumes a slice that was interrupted.
+As it builds, it records the decisions inside each module in
+`docs/design/<module>.md`, so the architecture document stays short.
 `/nightshift:slice` rewrites the backlog alone, for when the plan changes
 after the design is approved. To add or change a requirement later, run
 `/nightshift:spec` again: it asks about the change, updates the requirements,

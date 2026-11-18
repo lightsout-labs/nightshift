@@ -2,7 +2,8 @@
 
 <One sentence: what the project is.> It is built with the `nightshift`
 workflow. What it must do is in `docs/requirements.md`, how it is built is in
-`docs/architecture.md`, and progress is in `docs/backlog.md`.
+`docs/architecture.md` and, inside each module, in `docs/design/`, and
+progress is in `docs/backlog.md`.
 
 ## Commands
 
