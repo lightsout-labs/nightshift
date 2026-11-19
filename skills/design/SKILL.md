@@ -7,14 +7,16 @@ disable-model-invocation: true
 # design: decide how to build it
 
 Turn the approved requirements into `docs/architecture.md`, ADRs, and
-`docs/backlog.md`, and stop at the design gate. Write everything in English.
-Do the work yourself; do not launch agents.
+`docs/backlog.md`, and stop at the design gate. Do the work yourself; do
+not launch agents.
 
 ## 1. Check the gate
 
-Run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/nightshift.py" gate docs/requirements.md`
-from the project root. If it fails, tell the human what it printed and that
-`/nightshift:spec` comes first, and stop.
+`NS` is `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/nightshift.py"`, run from the
+project root. Run `NS gate docs/requirements.md`. If it fails, tell the human
+what it printed and that `/nightshift:spec` comes first, and stop. Then run
+`NS config`: write documents in its `language`, and with `ci: no` design for
+no CI.
 
 ## 2. Decide
 
@@ -30,7 +32,8 @@ changes the design. Decide everything else yourself:
   directly. Each piece of knowledge has one owning module.
 - Deep modules: few operations in each interface, substantial behavior
   behind it. If a module only passes calls through, merge it into another.
-- How each level is tested, the coverage floor, and how the project deploys.
+- How each level is tested, the coverage floor, and how the project
+  deploys; with `ci: no`, from the `release` stage, not from CI.
 - `make check` and `make e2e` are fixed: the workflow runs them by name.
 
 ## 3. Write

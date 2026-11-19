@@ -7,8 +7,11 @@ disable-model-invocation: true
 # spec: agree on the requirements
 
 Turn the human's idea into `docs/requirements.md` and stop at the
-requirements gate. Write everything in English. Do the work yourself; do not
-launch agents.
+requirements gate. Do the work yourself; do not launch agents. Write
+documents in the project's `language` (step 2; `NS config` prints it once
+`.nightshift` exists). `NS` is
+`python3 "${CLAUDE_PLUGIN_ROOT}/scripts/nightshift.py"`, run from the
+project root.
 
 ## 1. Understand
 
@@ -32,6 +35,12 @@ and your recommendation first.
   what was agreed.
 - Make each quality bar observable: a reference product, or named behaviors.
 - Ask which license the project has, unless a `LICENSE` file exists.
+- Unless `.nightshift` exists, ask in the first round for the project's
+  settings: the language of its documents (English first); whether CI runs
+  the checks, or the local `make check` and `make e2e` are enough to merge;
+  and whether `build` stops after each slice, so the human can `/clear`, or
+  builds every slice in one run; then also at what context size, in tokens,
+  Claude Code compacts it (200000 first).
 - Do not ask what you can decide yourself or what belongs to design.
 - Stop asking when further answers would not change the document.
 
@@ -42,8 +51,9 @@ and your recommendation first.
    Each requirement is one numbered, testable statement. If something
    seems missing, ask; add nothing the human has not agreed to. Record the
    human's answers under Decisions.
-2. Create the empty marker file `.nightshift` in the project root. It turns
-   the plugin's hooks on for this project.
+2. Unless it exists, copy `${CLAUDE_PLUGIN_ROOT}/templates/nightshift` to
+   `.nightshift` in the project root, set the human's answers in it, and
+   run `NS config` to check it. The file turns the plugin's hooks on.
 3. Write the repository's documents, where they do not exist yet:
    - `LICENSE`: the full text of the chosen license, with this year and
      `git config user.name` as the holder. No file if the human wants none.
@@ -51,8 +61,9 @@ and your recommendation first.
      a link to `docs/requirements.md`. Keep what an existing one says.
    - `.claude/settings.json`: a copy of
      `${CLAUDE_PLUGIN_ROOT}/templates/settings.json`, which loads this
-     plugin in every session in the project. Add its two keys to an
-     existing file instead.
+     plugin in every session in the project. Add its keys to an existing
+     file instead. With `stop-after-slice: no`, also set
+     `env.CLAUDE_CODE_AUTO_COMPACT_WINDOW` to the chosen size.
 
 ## 4. Open the gate
 

@@ -6,9 +6,9 @@ disable-model-invocation: true
 
 # slice: split the design into a backlog
 
-Write `docs/backlog.md` in English. Do the work yourself; do not launch
-agents. `NS` below is `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/nightshift.py"`,
-run from the project root.
+Write `docs/backlog.md`. Do the work yourself; do not launch agents. `NS`
+below is `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/nightshift.py"`, run from
+the project root. Run `NS config`, and write in its `language`.
 
 ## 1. Check the gate (only when run alone)
 
@@ -28,8 +28,8 @@ of earlier releases under `docs/backlog/`.
 
 - **S01 is a walking skeleton**: the thinnest path through every part of the
   architecture, doing one trivial thing end to end. It also delivers the
-  `Makefile` with `check` and `e2e`, CI with both as required checks, branch
-  protection, and deployment.
+  `Makefile` with `check` and `e2e`, CI with both as required checks
+  unless `ci: no`, branch protection, and deployment.
 - **Every other slice is vertical**: one behavior the user can see, through
   every layer it needs, with its own end-to-end test. Never a slice for one
   layer, for "setup", or for tests alone.
@@ -44,9 +44,10 @@ of earlier releases under `docs/backlog/`.
   slice it applies to, not a slice of its own at the end.
 - Every requirement is served by at least one slice. Nothing in the backlog
   goes beyond the requirements.
-- Keep the format exact, because scripts parse it: `## Snn: <title>`, a blank
-  line, `Status: Todo`, a blank line, `Acceptance criteria:` and its list.
-  Add no `PR` or `Notes`; `build` writes those.
+- Keep the format exact, and these words in English, because scripts parse
+  it: `## Snn: <title>`, a blank line, `Status: Todo`, a blank line,
+  `Acceptance criteria:` and its list. Add no `PR` or `Notes`; `build`
+  writes those.
 
 ## 3. Check
 

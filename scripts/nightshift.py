@@ -4,7 +4,7 @@
 Skills run this file as a command so that they never spend tokens on what can
 be computed. Hooks import it, so that the target project contract (marker
 file, gated documents, status line, backlog format) is written down in one
-place.
+place, and so are the project's settings.
 """
 
 from __future__ import annotations
@@ -19,6 +19,12 @@ from pathlib import Path
 
 MARKER = ".nightshift"
 MAIN = "main"
+
+# The project's settings, one `key: value` line each in the marker file, and
+# their defaults. A setting with choices takes only those; the language is
+# any name, such as `English` or `简体中文`.
+SETTINGS = {"language": "English", "ci": "yes", "stop-after-slice": "yes"}
+_CHOICES = {"ci": ("yes", "no"), "stop-after-slice": ("yes", "no")}
 GATED = (
     "docs/requirements.md",
     "docs/architecture.md",
@@ -225,6 +231,42 @@ def _archive(version: str) -> int:
     return 0
 
 
+class SettingsError(Exception):
+    """The marker file is missing or holds a setting that is not valid."""
+
+
+def project_settings(text: str) -> dict[str, str]:
+    """Return every setting for the marker file's text, with the defaults
+    for those it does not name."""
+    settings = dict(SETTINGS)
+    for number, line in enumerate(text.splitlines(), start=1):
+        if not line.strip():
+            continue
+        key, colon, value = (part.strip() for part in line.partition(":"))
+        if not colon or key not in SETTINGS:
+            name = key if colon else line.strip()
+            raise SettingsError(f"line {number}: unknown setting {name!r}")
+        choices = _CHOICES.get(key)
+        if choices and value not in choices:
+            raise SettingsError(f"line {number}: {key} must be {' or '.join(choices)}")
+        if not value:
+            raise SettingsError(f"line {number}: {key} must not be empty")
+        settings[key] = value
+    return settings
+
+
+def _config() -> int:
+    try:
+        text = Path(MARKER).read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        raise SettingsError("is not UTF-8 text") from None
+    except OSError:
+        raise SettingsError("not found; run this from the project root") from None
+    for key, value in project_settings(text).items():
+        print(f"{key}: {value}")
+    return 0
+
+
 def _version(text: str) -> str:
     if not _VERSION.fullmatch(text):
         raise argparse.ArgumentTypeError(f"{text!r} is not vMAJOR.MINOR.PATCH")
@@ -313,11 +355,20 @@ def main(argv: list[str] | None = None) -> int:
     )
     archive.add_argument("version", type=_version, help="such as v1.2.0")
     commands.add_parser(
+        "config", help="print the project's settings, with their defaults"
+    )
+    commands.add_parser(
         "usage", help="print the context, 5-hour, and weekly usage last seen"
     )
     args = parser.parse_args(argv)
     if args.command == "usage":
         return _usage()
+    if args.command == "config":
+        try:
+            return _config()
+        except SettingsError as error:
+            print(f"{MARKER}: {error}", file=sys.stderr)
+            return 1
     try:
         if args.command == "gate":
             return _gate(args.documents)

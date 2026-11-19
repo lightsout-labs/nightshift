@@ -60,7 +60,8 @@ These were agreed during planning and refine the requirements above.
   with three human gates: requirements approval, design approval, and final
   acceptance.
 - **Integration**: one pull request per vertical slice, squash-merged, with
-  auto-merge once CI is green.
+  auto-merge once CI is green, or once the checks pass locally in a project
+  without CI.
 - **First example stack**: TypeScript for `gridworks`. Rust is reserved for a
   later example, to show that the factory is language-agnostic.
 - **Language-agnostic contract**: the factory relies on a single `make check`
@@ -84,7 +85,23 @@ These were agreed during planning and refine the requirements above.
   stops. The human clears the context and runs it again. Agent quality drops
   as context grows, and a visible session cannot clear itself; a headless
   driver was rejected for now because the human would lose the live view.
-  This is a deliberate pause in addition to the three gates.
+  This is a deliberate pause in addition to the three gates, and a project
+  can turn it off (see Project settings).
+- **Project settings**: each project chooses, once for the whole repository
+  and in `spec` when it starts, three things that requirement 5 and the
+  decisions above otherwise fix:
+  - The language of its documents; English by default. Code, comments,
+    commit messages, and the words that scripts read stay in English.
+  - Whether it uses CI; yes by default. Without CI, a slice's pull request
+    merges as soon as `make check` and `make e2e` pass locally.
+  - Whether `build` stops after each slice for the human to clear the
+    context; yes by default. Otherwise `build` goes on through every slice
+    in one session, relying on the files rather than its context, and stops
+    only where the workflow always does: at the end of the backlog, on an
+    ambiguous criterion, or after three failed fixes. The human then also
+    chooses the context size, in tokens, at which Claude Code compacts the
+    session; as a backstop, `build` stops between slices when the context
+    is above 80%, because the agent cannot compact or clear it itself.
 - **Single-agent rule**: the workflow never splits its work across several
   agents or runs agents in parallel. This does not restrict the subagents that
   Claude Code starts on its own, for example to search or read code. They keep

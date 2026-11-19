@@ -427,3 +427,48 @@ Notes:
   `slice`, both behind a gate, though a defect changes nothing agreed.
 - The *(by hand)* criteria are not yet verified; they are when `gridworks`
   runs `fix` on its open issues.
+
+## S14: Project settings: language, CI, and stopping after a slice
+
+Status: Done
+
+Acceptance criteria:
+- `.nightshift` holds `key: value` settings: `language` (any name, default
+  `English`), `ci` (`yes` or `no`, default `yes`), and `stop-after-slice`
+  (`yes` or `no`, default `yes`). An empty file means the defaults.
+- `nightshift.py config` prints every setting with its default filled in,
+  and fails, naming the line, on an unknown key, an empty value, or a value
+  that is not allowed.
+- `spec` asks for the three settings when it creates `.nightshift`, from
+  `templates/nightshift` *(by hand)*.
+- Every skill writes documents in the configured language, keeping the words
+  that scripts read in English; a structure test checks that every skill
+  reads the setting *(by hand)*.
+- With `ci: no`, the walking skeleton sets up no CI, and `build`, `fix`, and
+  `release` merge a pull request once the checks pass locally *(by hand)*.
+- With `stop-after-slice: no`, `build` goes on to the next slice instead of
+  stopping, and stops at the end of the backlog, on an ambiguous criterion,
+  after three failed fixes, or when the context is above 80% *(by hand)*.
+- With `stop-after-slice: no`, `spec` asks for the auto-compact size and
+  sets `CLAUDE_CODE_AUTO_COMPACT_WINDOW` in `.claude/settings.json`
+  *(by hand)*.
+- `build` says that code, comments, and commit messages are in English,
+  whatever the document language.
+- The skill line budget is 95, with its reason in `tests/test_structure.py`.
+
+Notes:
+- Asked for by the owner after S13. The settings live in the existing
+  marker file, so a project needs no second file and projects started
+  before, such as `gridworks`, keep working with the defaults.
+- Squeezed into the 90-line budget, `build`'s delivery step turned vague,
+  and the independent review found it unclear; the budget was raised to 95
+  instead, since that step runs on every slice. With `ci: no`, `build` runs
+  `make e2e` once more before merging, because the review's fixes come
+  after the run in step 3.
+- The agent cannot run `/compact` itself, and Claude Code does not document
+  whether auto-compaction happens in the middle of a turn, hence the 80%
+  stop. The 80% is fixed, not a setting.
+- Switching `ci` after the walking skeleton is left to the human: CI and
+  branch protection already exist then.
+- The *(by hand)* criteria are not yet verified; they are when a project
+  starts with settings other than the defaults.

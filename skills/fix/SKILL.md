@@ -7,10 +7,10 @@ disable-model-invocation: true
 # fix: plan the fixes for reported defects
 
 Add a fix slice to `docs/backlog.md` for each issue that reports a defect,
-merge it, and stop. Write everything in English. Do the work yourself; do
-not launch agents. `NS` below is
-`python3 "${CLAUDE_PLUGIN_ROOT}/scripts/nightshift.py"`, run from the project
-root. The skill needs a GitHub remote and `gh`.
+merge it, and stop. Do the work yourself; do not launch agents. `NS` below
+is `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/nightshift.py"`, run from the
+project root. Run `NS config` and write in its `language`. The skill needs a
+GitHub remote and `gh`.
 
 ## 1. Read the issues
 
@@ -66,8 +66,9 @@ Defects do not change what was agreed, so they need no gate.
    asks to check further. Nothing beyond restoring the requirement.
 3. Run `NS next` and `make check`. Commit with the message
    `docs: plan fixes for #40, #44`, push, open a pull request with the same
-   title, run `gh pr merge --squash --auto`, then `gh pr checks --watch`.
-   When it has merged, switch to the updated `main`.
+   title, and merge it: with `ci: yes`, `gh pr merge --squash --auto`, then
+   `gh pr checks --watch`; with `ci: no`, `gh pr merge --squash`. When it
+   has merged, switch to the updated `main`.
 
 With no defect, skip this step.
 

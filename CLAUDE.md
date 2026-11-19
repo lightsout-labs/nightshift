@@ -39,7 +39,11 @@ to run when the document it depends on is not approved.
   broken (gates, `main` protection) belong in hooks, not in a prompt.
 - **Run to completion**: stop for the human only at the gates, on ambiguous
   requirements, after three failed fixes of the same problem, or between
-  slices so the human can clear the context.
+  slices so the human can clear the context, unless the project's
+  `stop-after-slice` setting is `no`.
+- **Project settings**: skills read `.nightshift` through
+  `nightshift.py config` and honor `language`, `ci`, and
+  `stop-after-slice`; see `docs/architecture.md`.
 - **TDD**: failing tests first, then the code that passes them.
 - **Vertical slices**: every slice is testable end to end. The first slice is a
   walking skeleton that includes CI, e2e, and deployment.

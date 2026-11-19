@@ -15,6 +15,8 @@ progress is in `docs/backlog.md`.
 ## Rules
 
 - Work on one slice at a time, with `/nightshift:build`. Tests come first.
+- `.nightshift` holds the project's settings: `language`, `ci`, and
+  `stop-after-slice`.
 - The simplest design and code that meet the requirements. Nothing for a
   need that is not stated.
 - Deep modules: small interfaces that hide substantial behavior.
@@ -22,6 +24,9 @@ progress is in `docs/backlog.md`.
   redundant or written to raise coverage.
 - Never commit to `main`. One branch and one squash-merged pull request per
   slice.
-- Code, comments, documents, and commit messages are in English.
+- Documents are in the `language` of `.nightshift`, except the words that
+  scripts read: `Status:` lines with their values, `## Snn:`,
+  `Acceptance criteria:`, `Notes:`, `Fixes:`, and `Closes:`. Code, comments, and commit messages are in
+  English.
 - Update the affected documents in the same change as the behavior.
 - Do not edit `scripts/check-docs.py`; it is a copy from the plugin.

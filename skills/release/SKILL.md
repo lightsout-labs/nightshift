@@ -6,11 +6,11 @@ disable-model-invocation: true
 
 # release: deliver a version
 
-Release what the backlog holds and stop at the acceptance gate. Write
-everything in English. Do the work yourself; do not launch agents. `PLUGIN`
-below is `${CLAUDE_PLUGIN_ROOT}`, `NS` is
-`python3 "PLUGIN/scripts/nightshift.py"` run from the project root, and
-`vX.Y.Z` is the version. The skill needs a GitHub remote and `gh`.
+Release what the backlog holds and stop at the acceptance gate. Do the work
+yourself; do not launch agents. `PLUGIN` below is `${CLAUDE_PLUGIN_ROOT}`,
+`NS` is `python3 "PLUGIN/scripts/nightshift.py"` run from the project root,
+and `vX.Y.Z` is the version. Run `NS config` and write in its `language`.
+The skill needs a GitHub remote and `gh`.
 
 ## 1. Find the release
 
@@ -40,8 +40,9 @@ below is `${CLAUDE_PLUGIN_ROOT}`, `NS` is
    and refuses while one is not `Done`. Fix any link that the move broke.
 5. Run `make check` and `make e2e`. Commit with the message
    `chore: release vX.Y.Z`, push, open a pull request with the same title,
-   and run `gh pr merge --squash --auto`, then `gh pr checks --watch`. When
-   it has merged, switch to the updated `main`.
+   and merge it: with `ci: yes`, `gh pr merge --squash --auto`, then
+   `gh pr checks --watch`; with `ci: no`, `gh pr merge --squash`. When it
+   has merged, switch to the updated `main`.
 
 ## 3. Tag and deploy
 

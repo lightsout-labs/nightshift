@@ -1,6 +1,7 @@
 # What a walking skeleton slice also delivers
 
-`PLUGIN` is the plugin's root, as in the `build` skill.
+`PLUGIN` is the plugin's root and `NS` the script, as in the `build`
+skill.
 
 - `Makefile`: `check` runs the format check, lint, unit tests with the
   coverage floor, and `python3 scripts/check-docs.py`; `e2e` runs the
@@ -10,8 +11,10 @@
 - `CLAUDE.md`, from `PLUGIN/templates/CLAUDE.md`, filled in.
 - `README.md`, which `spec` started: add how to install, run, and test the
   project, and where it is deployed.
-- CI that runs on every pull request, with two jobs named exactly `check`
-  and `e2e`, and deployment as the architecture document describes.
-- With `gh`, after the first push: squash merging only, auto-merge, branch
-  deletion on merge, and protection of `main` that requires `check` and
-  `e2e`, for administrators too.
+- With `ci: yes` in `NS config`: CI that runs on every pull request, with
+  two jobs named exactly `check` and `e2e`. With `ci: no`: no CI.
+- Deployment as the architecture document describes.
+- With `gh`, after the first push: squash merging only, branch deletion on
+  merge, and protection of `main` against direct and force pushes, for
+  administrators too. With `ci: yes`, also auto-merge, and the protection
+  requires `check` and `e2e`.
