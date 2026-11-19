@@ -44,7 +44,9 @@ because a requirement needs it.
 | `make check` | <Format check, lint, unit tests, coverage floor of N%>, `scripts/check-docs.py` |
 | `make e2e` | <How the end-to-end tests run> |
 
-CI runs both on every pull request as the required checks `check` and `e2e`.
+<With `ci: yes`:> CI runs both on every pull request as the required checks
+`check` and `e2e`. <With `ci: no`:> There is no CI; a pull request merges
+once both pass locally.
 
 ## Testing
 

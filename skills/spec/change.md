@@ -2,7 +2,9 @@
 
 The requirements are approved and a backlog exists, so the human is adding to
 or changing what gets built. Handle the whole change on one branch, behind one
-gate. Write everything in English. Do the work yourself; do not launch agents.
+gate. Write documents in the `language` that
+`python3 "${CLAUDE_PLUGIN_ROOT}/scripts/nightshift.py" config` prints. Do the
+work yourself; do not launch agents.
 
 1. **Ask** about the change only, as step 2 of the spec skill says.
 2. **Branch**: create `docs/<short-description>` from the latest `main`.

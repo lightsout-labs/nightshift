@@ -98,7 +98,9 @@ def write_requirements_draft(project: Path) -> Path:
     requirements = project / "docs" / "requirements.md"
     requirements.parent.mkdir()
     requirements.write_text(template)
-    (project / ".nightshift").touch()
+    (project / ".nightshift").write_text(
+        (ROOT / "templates" / "nightshift").read_text()
+    )
     git(project, "switch", "--quiet", "-c", "docs/requirements")
     git(project, "add", "--all")
     git(project, "commit", "--quiet", "-m", "docs: draft requirements")

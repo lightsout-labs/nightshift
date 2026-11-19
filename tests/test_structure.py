@@ -9,9 +9,12 @@ from conftest import ROOT
 # Every line of a skill is read on every run, and each added rule weakens the
 # others. Raised from 80 to 90 when the design was split in two levels: at 80,
 # `build` had to drop the ADR template and blur its instructions to fit, and
-# an unclear instruction costs more than a few lines. Move what only one case
-# needs to a file beside the skill before raising it again.
-SKILL_LINE_BUDGET = 90
+# an unclear instruction costs more than a few lines. Raised to 95 for the
+# project settings: squeezed into 90, `build`'s delivery step turned vague,
+# and the step runs on every slice, so a file beside the skill saves nothing.
+# Move what only one case needs to a file beside the skill before raising it
+# again.
+SKILL_LINE_BUDGET = 95
 SKILLS = sorted((ROOT / "skills").glob("*/SKILL.md"))
 AGENTS = sorted((ROOT / "agents").glob("*.md"))
 
@@ -72,6 +75,18 @@ def test_every_plugin_file_a_skill_names_exists(path):
 
     for relative in named:
         assert (ROOT / relative).is_file(), f"{path} names missing {relative}"
+
+
+@pytest.mark.parametrize(
+    "path",
+    [*SKILLS, ROOT / "skills" / "spec" / "change.md"],
+    ids=lambda path: f"{path.parent.name}/{path.name}",
+)
+def test_every_skill_that_writes_documents_reads_the_language_setting(path):
+    text = path.read_text()
+
+    assert "NS config" in text or 'nightshift.py" config' in text
+    assert "`language`" in text
 
 
 def test_the_slice_reviewer_is_the_only_agent_and_is_read_only():

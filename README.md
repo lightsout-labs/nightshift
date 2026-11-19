@@ -30,12 +30,14 @@ nowhere else.
 |---|---|---|---|
 | Spec | `/nightshift:spec` | `docs/requirements.md`, after asking you clarifying questions | Approve |
 | Design | `/nightshift:design` | `docs/architecture.md`, ADRs, and a backlog of vertical slices | Approve |
-| Build | `/nightshift:build` | One slice per run: tests first, then code, one review by a separate read-only agent, then a pull request that merges itself when CI is green | Run `/clear` and the command again |
+| Build | `/nightshift:build` | One slice per run: tests first, then code, one review by a separate read-only agent, then a pull request that merges itself when CI is green | Run `/clear` and the command again, unless the project builds every slice in one run |
 | Release | `/nightshift:release` | A tagged version, a changelog, a deployment, and a delivery report | Accept |
 
 After you approve the requirements, design starts in the same session.
 `/nightshift:build` builds one slice and stops, so that each slice starts
-from a clean context; it resumes a slice that was interrupted.
+from a clean context; it resumes a slice that was interrupted. A project can
+choose instead to have it build every slice in one run (see
+[Settings](#settings)).
 As it builds, it records the decisions inside each module in
 `docs/design/<module>.md`, so the architecture document stays short.
 `/nightshift:slice` rewrites the backlog alone, for when the plan changes
@@ -76,9 +78,37 @@ A fourth hook runs `make check` whenever the agent tries to stop in the
 middle of a slice, and sends it back to work when the check fails. After
 three failures in a row it lets the agent stop to ask you instead.
 
-A project opts in through an empty `.nightshift` file in its root, which
+A project opts in through a `.nightshift` file in its root, which
 `/nightshift:spec` creates. Without it the hooks do nothing, so the plugin can
 stay enabled everywhere.
+
+### Settings
+
+`.nightshift` also holds the project's settings, which `/nightshift:spec`
+asks for when it starts the project. Edit the file to change them later.
+
+```
+language: English
+ci: yes
+stop-after-slice: yes
+```
+
+- `language`: the language of the documents, such as `简体中文`. Code,
+  comments, commit messages, and the few words that scripts read, such as
+  `Status: Draft`, stay in English.
+- `ci`: with `no`, the project has no CI, and a slice's pull request merges
+  as soon as `make check` and `make e2e` pass locally. Switching after the
+  first slice also means changing the CI workflow and branch protection.
+- `stop-after-slice`: with `no`, `/nightshift:build` goes on through every
+  slice in one run instead of stopping after each, and stops only at the end
+  of the backlog, on an ambiguous criterion, or after three failed fixes.
+  `/nightshift:spec` then also asks at what context size Claude Code should
+  compact the session, and sets `CLAUDE_CODE_AUTO_COMPACT_WINDOW` in
+  `.claude/settings.json`; change it there later. If the context still
+  passes 80%, `build` stops between slices so you can `/clear`. Each slice
+  reads its state from the files, not from the context.
+
+A setting left out has the default shown above, so an empty file is valid.
 
 There is no separate command to set a project up. `/nightshift:spec` also
 asks for the license and writes `LICENSE`, a first `README.md`, and a

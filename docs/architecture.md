@@ -60,8 +60,8 @@ and scripts depend on nothing else.
 
 | Path | Written by | Gated |
 |---|---|---|
-| `.nightshift` | `spec` | No. Empty marker file; hooks do nothing without it |
-| `.claude/settings.json` | `spec` | No. Enables the plugin, so every session in the project loads the hooks, and sets the status line that records usage |
+| `.nightshift` | `spec` | No. The project's settings (see [Settings](#settings)); hooks do nothing without it |
+| `.claude/settings.json` | `spec` | No. Enables the plugin, so every session in the project loads the hooks, and sets the status line that records usage. With `stop-after-slice: no`, also sets the auto-compact window |
 | `LICENSE` | `spec` | No. The license the human chose; absent if they want none |
 | `README.md` | `spec`, completed by `build` in the walking skeleton | No. Goal first; how to run, test, and deploy once that exists |
 | `docs/requirements.md` | `spec` | Yes |
@@ -86,6 +86,24 @@ holds what spans modules, and every slice reads it. A module's file in
 `docs/design/` holds the decisions inside that module, and only the slices
 that touch the module read it. It has no status: like an ADR, it records
 decisions made while building, within the approved architecture.
+
+### Settings
+
+`.nightshift` holds one `key: value` line per setting. A setting it does not
+name has its default, so an empty file, as written before settings existed,
+means the defaults.
+
+| Key | Values | Default | Effect |
+|---|---|---|---|
+| `language` | Any language name | `English` | Documents and pull request descriptions are written in it. Code, comments, commit messages, and the words that scripts read (`Status:` lines with their values, `## Snn:`, `Acceptance criteria:`, `Notes:`, `Fixes:`, `Closes:`) stay in English |
+| `ci` | `yes`, `no` | `yes` | With `no`, the walking skeleton sets up no CI, and a pull request merges once `make check` and `make e2e` pass locally |
+| `stop-after-slice` | `yes`, `no` | `yes` | With `no`, `build` goes on to the next slice instead of stopping (see [Building a slice](#building-a-slice)) |
+
+`spec` asks for the settings when it creates the file, from
+`templates/nightshift`. Every skill reads them with `nightshift.py config`,
+never from the file, so the defaults and the rules live in one place.
+Switching `ci` after the walking skeleton also means changing the CI
+workflow and branch protection by hand.
 
 ### Backlog format
 
@@ -130,8 +148,9 @@ Notes:
 | `make check` | Format check, lint, unit tests, coverage floor, `scripts/check-docs.py` | On every change, in the stop hook, in CI |
 | `make e2e` | End-to-end tests | Before a slice's pull request, in CI |
 
-CI must expose these as two required checks named `check` and `e2e`. How a
-project deploys is described in its own architecture document, because it
+With `ci: yes`, CI must expose these as two required checks named `check`
+and `e2e`. With `ci: no` there is no CI, and the local runs are the gate. How
+a project deploys is described in its own architecture document, because it
 depends on the toolchain.
 
 ## Skills
@@ -144,7 +163,7 @@ message to the human if a gate is closed.
 | `spec` | Nothing | Asks clarifying questions until no requirement is ambiguous, proposes features and quality bars for the human to accept or decline, then writes `docs/requirements.md` from the template, `LICENSE`, a first `README.md`, and `.claude/settings.json`. In a project under way (requirements approved, backlog exists), changes the requirements, the architecture where needed, and the backlog on one branch | Stops at the requirements gate |
 | `design` | Requirements approved | Writes `docs/architecture.md` and ADRs, then runs `slice` | Stops at the design gate |
 | `slice` | Requirements approved, architecture exists | Writes `docs/backlog.md`: a walking skeleton first, then vertical slices with acceptance criteria | Returns to `design`, or stops at a gate for the backlog if run alone |
-| `build` | Architecture and backlog approved | Builds the next slice (see below) | Stops after one slice |
+| `build` | Architecture and backlog approved | Builds the next slice (see below) | Stops after one slice, or after the last with `stop-after-slice: no` |
 | `fix` | Requirements, architecture, and backlog approved | Reads GitHub issues and sorts them: a defect, where the product does not do what an approved requirement says, gets a fix slice placed before the slices still to do; an issue that asks for something new is left to `spec`. Merges the backlog change without a gate, since nothing agreed changes | Asks for `/clear` and `/nightshift:build` |
 | `release` | All slices `Done` | Tags a version, writes the changelog, deploys, archives the backlog, writes the delivery report | Stops at the acceptance gate |
 
@@ -184,13 +203,16 @@ slice is already `In progress`, the run resumes it from its `Notes`.
    the `slice-reviewer` agent once and fix its findings.
 5. Record in `Notes` what later slices need, set the slice to `Done`, and
    push once; then open a pull request with the review result in the
-   description and enable auto-merge. A second push would start CI again
-   and cancel the first run. A failing check is fixed, and recorded in
-   `Notes`, in the same pull request.
-6. Wait for the merge, then stop and tell the human to run `/clear` and
-   `/nightshift:build` again, with the line that `nightshift.py usage`
+   description. With `ci: yes`, enable auto-merge; a second push would start
+   CI again and cancel the first run, and a failing check is fixed, and
+   recorded in `Notes`, in the same pull request. With `ci: no`, run
+   `make e2e` once more, since the review fixes came after it, and merge.
+6. Once merged, report the slice with the line that `nightshift.py usage`
    prints. When no slice is left, tell the human to run
-   `/nightshift:release` instead.
+   `/nightshift:release`. With `stop-after-slice: yes`, stop and tell the
+   human to run `/clear` and `/nightshift:build` again. With `no`, go on to
+   the next slice from step 1 of this list, unless the context is above 80%,
+   in which case stop as with `yes`.
 
 A failed fix is recorded in the slice's `Notes`. After three failed fixes of
 the same problem, the skill stops and asks the human.
@@ -207,12 +229,22 @@ The skill itself launches no agent other than the reviewer in step 4. It
 neither asks for nor forbids the subagents that Claude Code starts on its own
 to search or read code; those keep the main context small.
 
-The skill stops after each slice because agent quality drops as context
-grows, and only the human can clear the context of a visible session. Every
-slice therefore starts clean, reading its state from the backlog, and the
-human keeps a live view of the work. The unit of the skill is one slice, so a
-driver that repeats it without the human can be added later without changing
-the skill.
+By default the skill stops after each slice because agent quality drops as
+context grows, and only the human can clear the context of a visible
+session. Every slice therefore starts clean, reading its state from the
+backlog, and the human keeps a live view of the work. A project that would
+rather not attend each slice sets `stop-after-slice: no`: `build` then loops
+over the slices in one session, and Claude Code's automatic compaction
+bounds the context. Each slice still takes its state from the files, so a
+compacted or interrupted run resumes as a fresh one would.
+
+The agent cannot compact or clear its own context, so the loop relies on two
+limits. `spec` sets `CLAUDE_CODE_AUTO_COMPACT_WINDOW` in the project's
+`.claude/settings.json` `env` to the size the human chose, so Claude Code
+compacts at that many tokens. Claude Code does not document whether it
+compacts in the middle of a long turn, so `build` also stops between slices
+when `nightshift.py usage` shows the context above 80%, and the human clears
+it.
 
 ### The slice reviewer
 
@@ -255,7 +287,7 @@ something that is already deployed:
 2. On the branch `chore/release-vX.Y.Z`: add the version's section to
    `CHANGELOG.md`, with one line per slice, set the version where the project
    records it, and run `nightshift.py archive`. The pull request merges
-   itself when CI is green.
+   itself when CI is green, or with `ci: no` once the local checks pass.
 3. Tag the merged `main` and push the tag, then deploy and verify as the
    project's architecture document describes. A failed deployment is fixed
    through a pull request of its own; a tag is never moved, so the fix is
@@ -277,7 +309,7 @@ run stopped between steps 2 and 4. Like
 
 ## Scripts
 
-`scripts/nightshift.py` has five subcommands, so that skills never spend
+`scripts/nightshift.py` has six subcommands, so that skills never spend
 tokens on what can be computed:
 
 | Subcommand | Result |
@@ -286,6 +318,7 @@ tokens on what can be computed:
 | `next` | Prints the section of the next slice to build, followed by the `Notes` items of earlier slices that name it; or reports that none is left, or that the backlog has no slices |
 | `set-status <slice> <status>` | Updates one slice's status in the backlog; refuses a second slice `In progress` |
 | `archive <version>` | Moves every slice to `docs/backlog/<version>.md`, leaving the backlog's title, status, and introduction; refuses when a slice is not `Done`, when there is none, or when the file exists |
+| `config` | Prints every [setting](#settings) as `key: value`, with the defaults for those `.nightshift` does not name; fails, naming the line, on an unknown key, an empty value, or a value that is not allowed |
 | `usage` | Prints the context, 5-hour, and weekly usage, such as `Context 43% · 5h 27% · week 61%`, as the status line last recorded it |
 
 `next`, `set-status`, and `archive` read `docs/backlog.md` under the current
@@ -303,7 +336,7 @@ file, `usage` says how to add the status line. It always exits 0, because the
 report is information, not a check.
 
 The same file is the one place that knows the target project contract: the
-marker file, the gated paths, how a status line is read and approved, and
+marker file and its settings, the gated paths, how a status line is read and approved, and
 how the backlog is split into slices.
 Hooks import it instead of repeating those rules.
 
@@ -421,8 +454,8 @@ through `uv`, which installs them from `pyproject.toml` on first use.
 
 | Level | Covers | How |
 |---|---|---|
-| Unit | Backlog and status parsing, each `check-docs` rule, each hook's decision | `pytest`, through each script's command-line interface |
-| Structure | Manifests are valid, every skill has frontmatter and stays within a budget of 90 lines (see the comment in `tests/test_structure.py` before raising it), every plugin file that a skill names exists, the settings template names this marketplace and plugin, the reviewer is the only agent, has no tool but `Read`, and is named only by `build` | `pytest` |
+| Unit | Settings, backlog, and status parsing, each `check-docs` rule, each hook's decision | `pytest`, through each script's command-line interface |
+| Structure | Manifests are valid, every skill has frontmatter and stays within a budget of 90 lines (see the comment in `tests/test_structure.py` before raising it), every plugin file that a skill names exists, the settings template names this marketplace and plugin, every skill reads the language setting, the reviewer is the only agent, has no tool but `Read`, and is named only by `build` | `pytest` |
 | End to end (`make e2e`) | Hooks and scripts against a temporary git repository that plays a target project through all stages | `pytest`, with hook input fed as Claude Code sends it |
 | Skills | Whether the prompts produce the intended behavior | Building `gridworks`; problems found there become slices here |
 

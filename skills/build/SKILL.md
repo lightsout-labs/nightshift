@@ -1,16 +1,17 @@
 ---
 name: build
-description: Build the next slice of a nightshift project. Writes failing tests, then code until make check and make e2e pass, and opens a pull request that merges itself. One slice per run.
+description: Build the next slice of a nightshift project. Writes failing tests, then code until make check and make e2e pass, and opens a pull request that merges itself. One slice per run, or every slice when the project's settings say so.
 disable-model-invocation: true
 ---
 
 # build: build one slice
 
-Build the first slice of `docs/backlog.md` that is not `Done`, then stop.
-Write everything in English. Do the work yourself; the only agent you launch
-is the reviewer in step 4. `PLUGIN` below is `${CLAUDE_PLUGIN_ROOT}`, `NS` is
-`python3 "PLUGIN/scripts/nightshift.py"` run from the project root, and `Snn`
-is the slice's number.
+Build the first slice of `docs/backlog.md` that is not `Done`. Do the work
+yourself; the only agent you launch is the reviewer in step 4. `PLUGIN` is
+`${CLAUDE_PLUGIN_ROOT}`, `NS` is `python3 "PLUGIN/scripts/nightshift.py"` run
+from the project root, and `Snn` is the slice's number. Run `NS config`:
+write documents in its `language`, and code, comments, and commit messages in
+English; its `ci` and `stop-after-slice` settings apply in step 5.
 
 ## 1. Find the slice
 
@@ -77,13 +78,18 @@ Once per slice. If `.git/nightshift/review-Snn.md` exists, go to 3.
 ## 5. Deliver
 
 1. Add to `Notes` what a later slice needs, naming it by number. Run
-   `NS set-status Snn done` and `make check`, commit, push, open a pull
-   request titled `<type>: <summary> (Snn)` with the body from
-   `PLUGIN/templates/pull-request.md`, and `gh pr merge --squash --auto`.
-   A slice with a `Fixes` line is of type `fix`.
-2. Run `gh pr checks --watch`. Fix a failing check as in step 3, adding to
-   `Notes` what failed and what fixed it. Once merged, switch to `main`.
-3. Tell the human what was built in at most five lines, the line that
-   `NS usage` prints, and: "Run `/clear`, then `/nightshift:build`." If
-   `NS next` reports that no slice is left, name `/nightshift:release`
-   instead. Stop.
+   `NS set-status Snn done` and `make check`, commit, push, and open a pull
+   request titled `<type>: <summary> (Snn)`, of type `fix` when the slice
+   has a `Fixes` line, with the body from `PLUGIN/templates/pull-request.md`.
+2. Merge. With `ci: yes`, run `gh pr merge --squash --auto` and
+   `gh pr checks --watch`; fix a failing check as in step 3, adding to
+   `Notes` what failed and what fixed it. With `ci: no`, run `make e2e`
+   again, since the review fixes came after it, then `gh pr merge --squash`.
+   Once merged, switch to `main`.
+3. Tell the human what was built in at most five lines and the line that
+   `NS usage` prints. If `NS next` reports that no slice is left, say: "Run
+   `/clear`, then `/nightshift:release`." and stop.
+4. With `stop-after-slice: yes`, or with `no` and `NS usage` showing context
+   above 80%, say: "Run `/clear`, then `/nightshift:build`." and stop.
+   Otherwise build the next slice from step 1.2. Read its files again as
+   step 1.3 says; rely on nothing you remember from earlier slices.
