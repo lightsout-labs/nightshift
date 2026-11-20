@@ -469,6 +469,10 @@ No test calls a model, so CI is free and deterministic (see
 with one difference: until a stage's skill exists, that stage is done by hand
 following this document.
 
+Its `.nightshift` holds the default settings, so the hooks apply here as in
+a target project when the plugin is loaded, for example with
+`claude --plugin-dir .`.
+
 Its version is recorded in `.claude-plugin/plugin.json` and `pyproject.toml`.
 Deployment is the tag: users install the plugin from this repository's
 marketplace, so pushing the tag on `main` is the release. It is verified with

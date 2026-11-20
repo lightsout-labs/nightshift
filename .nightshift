@@ -1,0 +1,3 @@
+language: English
+ci: yes
+stop-after-slice: yes
