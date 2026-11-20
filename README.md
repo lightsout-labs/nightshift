@@ -4,9 +4,9 @@ A Claude Code plugin that runs a solo "software factory". You review the
 requirements and the design, and you accept the delivery. The agent does
 everything else: documents, code, tests, CI, and releases.
 
-> **Status**: every stage exists, and the plugin has not been released yet.
+> **Status**: v0.1.0, the first release; see [CHANGELOG.md](CHANGELOG.md).
 > What the skills do is being verified by building `lightsout-labs/gridworks`;
-> see [docs/backlog.md](docs/backlog.md).
+> see [docs/backlog/v0.1.0.md](docs/backlog/v0.1.0.md).
 
 ## Install
 
@@ -124,7 +124,9 @@ plugin is not loaded: check `/plugin`. The first slice completes the
 - [docs/requirements.md](docs/requirements.md): what the plugin must do.
 - [docs/architecture.md](docs/architecture.md): skills, scripts, hooks, and
   the contract with a target project.
-- [docs/backlog.md](docs/backlog.md): the slices and their status.
+- [docs/backlog.md](docs/backlog.md): the slices of the release in progress;
+  earlier releases are in `docs/backlog/`.
+- [CHANGELOG.md](CHANGELOG.md): what each version changed.
 
 ## Development
 

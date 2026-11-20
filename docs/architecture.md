@@ -469,10 +469,16 @@ No test calls a model, so CI is free and deterministic (see
 with one difference: until a stage's skill exists, that stage is done by hand
 following this document.
 
+Its version is recorded in `.claude-plugin/plugin.json` and `pyproject.toml`.
+Deployment is the tag: users install the plugin from this repository's
+marketplace, so pushing the tag on `main` is the release. It is verified with
+`claude plugin validate .` on the tagged commit, and by installing the plugin
+from the marketplace in a new session and listing its commands.
+
 ## Planned slices
 
-The slices and their acceptance criteria are in [backlog.md](backlog.md). In
-short:
+The slices of v0.1.0 and their acceptance criteria are in
+[backlog/v0.1.0.md](backlog/v0.1.0.md); the first eight were planned as:
 
 1. Walking skeleton: a loadable plugin and marketplace, the `spec` skill with
    its template, the `gate` subcommand, gate protection, the approval hook,
