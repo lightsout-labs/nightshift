@@ -1,6 +1,6 @@
 [project]
 name = "nightshift"
-version = "0.0.0"
+version = "0.1.0"
 description = "Development tooling for the nightshift Claude Code plugin"
 requires-python = ">=3.9"
 dependencies = []

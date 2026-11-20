@@ -1,5 +1,6 @@
 {
   "name": "nightshift",
+  "version": "0.1.0",
   "description": "A solo software factory: the human reviews requirements and design and accepts the delivery; the agent does everything else.",
   "author": {
     "name": "lightsout-labs",
