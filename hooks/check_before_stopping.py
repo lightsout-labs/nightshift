@@ -2,10 +2,14 @@
 """Stop hook: the agent cannot stop a slice while `make check` fails.
 
 While a slice is `In progress`, the hook runs `make check` and blocks the
-stop when it fails, passing the output to the agent. The third failure in a
-row does not block: the agent is told to ask the human, and its next stop
-goes through. The check is skipped while the working tree is the one that
-last passed. State is kept in the git directory, so it is never committed.
+stop when it fails, passing the output to the agent. A failure counts as a
+failed fix only when the working tree changed since the last run; a stop
+with the tree unchanged since a failure goes through without a run, because
+the agent is waiting for a background job or asking the human. The third
+failed fix in a row does not block: the agent is told to ask the human, and
+its next stop goes through. The check is also skipped while the working tree
+is the one that last passed. State is kept in the git directory, so it is
+never committed.
 """
 
 from __future__ import annotations
@@ -25,10 +29,15 @@ LIMIT = 3
 # The end of the output is where a failing check names what failed.
 OUTPUT_CHARACTERS = 6000
 
-FIX = "`make check` fails (failure {count} of {limit} in a row). Fix it, then stop."
+FIX = (
+    "`make check` fails (failure {count} of {limit} in a row). Fix it, then stop. "
+    "To wait for a background job or ask the human instead, stop without "
+    "changing files: the check runs again once the working tree changes."
+)
 ASK = (
     f"`make check` has failed {LIMIT} times in a row. Do not try another fix. "
-    "Tell the human the problem and what you tried, ask how to go on, and stop."
+    "Commit and push the work, tell the human the problem and what you tried, "
+    "ask how to go on, and stop."
 )
 
 
@@ -66,11 +75,15 @@ class State:
             saved = {}
         self.failures: int = saved.get("failures", 0)
         self.passed: str | None = saved.get("passed")
+        self.failed: str | None = saved.get("failed")
 
     def save(self) -> None:
-        self.file.write_text(
-            json.dumps({"failures": self.failures, "passed": self.passed})
-        )
+        saved = {
+            "failures": self.failures,
+            "passed": self.passed,
+            "failed": self.failed,
+        }
+        self.file.write_text(json.dumps(saved))
 
     def working_tree(self) -> str | None:
         """A hash of every file git does not ignore, committed or not.
@@ -125,15 +138,16 @@ def main() -> int:
         state.save()
         return 0
     tree = state.working_tree()
-    if tree is not None and tree == state.passed:
+    if tree is not None and tree in (state.passed, state.failed):
         return 0
     passed, output = _make_check(project)
+    # Hashed again, because the check itself may have written files.
     if passed:
-        # Hashed again, because the check itself may have written files.
-        state.failures, state.passed = 0, state.working_tree()
+        state.failures, state.passed, state.failed = 0, state.working_tree(), None
         state.save()
         return 0
     state.failures += 1
+    state.failed = state.working_tree()
     state.save()
     if state.failures < LIMIT:
         print(FIX.format(count=state.failures, limit=LIMIT), file=sys.stderr)
