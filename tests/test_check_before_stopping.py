@@ -36,6 +36,11 @@ class Building:
     def fix_check(self):
         (self.root / "broken").unlink()
 
+    def attempt_fix(self):
+        """Changes the code without making the check pass."""
+        app = self.root / "app.py"
+        app.write_text(app.read_text() + "y = 1\n")
+
     def stop(self):
         return run_hook(
             "check_before_stopping",
@@ -69,10 +74,12 @@ def test_allows_the_stop_when_the_check_passes(building):
     assert building.runs() == 1
 
 
-def test_third_failure_in_a_row_sends_the_agent_to_the_human(building):
+def test_third_failed_fix_in_a_row_sends_the_agent_to_the_human(building):
     building.break_check()
     assert building.stop().returncode == BLOCKED
+    building.attempt_fix()
     assert building.stop().returncode == BLOCKED
+    building.attempt_fix()
 
     third = building.stop()
 
@@ -81,6 +88,8 @@ def test_third_failure_in_a_row_sends_the_agent_to_the_human(building):
     feedback = json.loads(third.stdout)["hookSpecificOutput"]
     assert feedback["hookEventName"] == "Stop"
     assert "human" in feedback["additionalContext"]
+    assert "commit" in feedback["additionalContext"].lower()
+    assert "push" in feedback["additionalContext"]
     assert "lint: boom in app.py" in feedback["additionalContext"]
 
     # The stop that asks the human goes through without another run.
@@ -90,12 +99,14 @@ def test_third_failure_in_a_row_sends_the_agent_to_the_human(building):
     assert building.runs() == 3
 
     # After the human answers, the agent has three attempts again.
+    building.attempt_fix()
     assert building.stop().returncode == BLOCKED
 
 
 def test_a_passing_run_resets_the_count(building):
     building.break_check()
     assert building.stop().returncode == BLOCKED
+    building.attempt_fix()
     assert building.stop().returncode == BLOCKED
     building.fix_check()
     assert building.stop().returncode == 0
@@ -103,7 +114,27 @@ def test_a_passing_run_resets_the_count(building):
     building.break_check()
 
     assert building.stop().returncode == BLOCKED
+    building.attempt_fix()
     assert building.stop().returncode == BLOCKED
+
+
+def test_a_stop_without_a_change_since_the_failure_goes_through_uncounted(building):
+    """The agent is waiting for a background job or asking the human: the
+    check would fail the same way, and it is not a failed fix."""
+    building.break_check()
+    assert building.stop().returncode == BLOCKED
+
+    for _ in range(3):
+        waiting = building.stop()
+        assert waiting.returncode == 0
+        assert waiting.stdout == ""
+    assert building.runs() == 1
+
+    building.attempt_fix()
+    second = building.stop()
+
+    assert second.returncode == BLOCKED
+    assert "failure 2 of 3" in second.stderr
 
 
 @pytest.mark.parametrize("status", ["Todo", "Done"])

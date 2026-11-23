@@ -372,7 +372,7 @@ the plugin can stay enabled in unrelated repositories.
 |---|---|---|
 | Gate protection | `PreToolUse` on `Edit`, `Write`, `Bash` | An edit would leave a file with an approved status line that it does not have now, or a shell command contains the text `Status: Approved` |
 | `main` protection | `PreToolUse` on `Bash` | `git commit` while on `main`, `git push` to `main`, or any force push |
-| Check before stopping | `Stop` | A slice is `In progress` and `make check` fails, up to twice in a row |
+| Check before stopping | `Stop` | A slice is `In progress` and `make check` fails after a change, up to twice in a row |
 
 A fourth hook does not block anything; it is how the human approves:
 
@@ -409,13 +409,21 @@ Details:
   end of its output, where a failing check names what failed. It keeps a
   count of consecutive failures in `.git/nightshift/`, which is never
   committed. A passing run resets the count.
-- The third failure in a row does not block. Claude Code delivers a hook's
-  text to the agent only by continuing the turn, so the hook returns the
-  output as feedback that tells the agent to ask the human, and lets the
-  next stop through without running the check. The count then starts again,
-  so the agent has three attempts after the human answers.
+- A failure counts only when the working tree changed since the last run,
+  so the count is of failed fixes. A stop with the tree unchanged since a
+  failure goes through without a run: the agent is waiting for a background
+  job or asking the human, and the check would fail the same way. Counting
+  such stops once sent the agent to the human while a long job it had
+  started to fix the failure was still running. The block message says so,
+  so the agent stops without changing files when it means to wait.
+- The third failed fix in a row does not block. Claude Code delivers a
+  hook's text to the agent only by continuing the turn, so the hook returns
+  the output as feedback that tells the agent to commit and push the work
+  and ask the human, as `build` says, and lets the next stop through without
+  running the check. The count then starts again, so the agent has three
+  attempts after the human answers.
 - The stop hook skips `make check` when the working tree is unchanged since
-  the last passing run. It compares a hash of every file that git does not
+  the last run, passing or failing. It compares a hash of every file that git does not
   ignore, committed or not, which it takes by staging the files in an index
   of its own under `.git/nightshift/`. The project's index is not touched.
 - The stop hook does nothing outside a git repository, and nothing when the
